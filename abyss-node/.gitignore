@@ -1,0 +1,33 @@
+# Virtual environment
+.venv/
+
+# Evennia database
+*.db3
+*.sqlite3
+
+# Evennia server files
+abyss_node/server/server.pid
+abyss_node/server/portal.pid
+abyss_node/server/logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/

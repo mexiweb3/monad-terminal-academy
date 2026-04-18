@@ -1,0 +1,195 @@
+{
+  "style_guide": "\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n",
+  "palettes": {
+    "spawn": "warm orange and clinical white with blood red accents",
+    "market": "chaotic mix of neon signs - pink, blue, green, yellow",
+    "bar": "deep blue and purple with amber drink glow",
+    "temple": "ethereal cyan and gold with digital artifacts",
+    "industrial": "rust orange, toxic green, warning yellow",
+    "residential": "dim warm lights against cold steel blue",
+    "combat": "aggressive red and chrome silver",
+    "underground": "bioluminescent green and damp grey"
+  },
+  "rooms": {
+    "entrance": {
+      "name": "Entrance to the Abyss",
+      "prompt": "\nA broken hole in cracked concrete pavement leading down into darkness.\nA damaged neon sign reads \"WELC ME\" with the O missing, flickering pink and blue.\nRusty metal staircase descending into shadow. Graffiti on walls.\nUrban decay meets cyberpunk underground entrance.\nColors: rust orange, toxic green, warning yellow\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#FF6B35",
+        "#1A1A2E",
+        "#16213E",
+        "#E94560"
+      ]
+    },
+    "passage": {
+      "name": "Rusted Passage",
+      "prompt": "\nNarrow industrial corridor with exposed pipes dripping green liquid.\nTetanus-inducing rusty metal walls. Broken screen displaying \"SYSTEM OFFLINE\".\nSteam vents and flickering fluorescent lights. Claustrophobic atmosphere.\nColors: rust orange, toxic green, warning yellow\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#2D3436",
+        "#00B894",
+        "#FDCB6E",
+        "#E17055"
+      ]
+    },
+    "alley": {
+      "name": "Rat Alley",
+      "prompt": "\nDead-end alley filled with electronic waste and copper wires.\nGiant cybernetic rats with glowing red LED eyes lurking in shadows.\nGraffiti reads \"The Ghosts never forget\". Bioluminescent fungi on walls.\nGarbage and cables everywhere. Dark and menacing atmosphere.\nColors: bioluminescent green and damp grey\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#0F0F0F",
+        "#00FF41",
+        "#FF0040",
+        "#4A4A4A"
+      ]
+    },
+    "tank": {
+      "name": "Water Tank",
+      "prompt": "\nMassive industrial water tank converted into makeshift housing.\nHammocks and sleeping pods hanging like spider webs inside metal cylinder.\nFaded \"CLEAN WATER FOR ALL 2045\" propaganda poster. Refugees' belongings.\nWarm dim lights against cold industrial metal. Desperate but human.\nColors: dim warm lights against cold steel blue\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#2C3E50",
+        "#E67E22",
+        "#95A5A6",
+        "#3498DB"
+      ]
+    },
+    "crossing": {
+      "name": "Central Crossing",
+      "prompt": "\nUnderground intersection where four tunnels meet under a cracked dome.\nBroken holographic clock projecting \"99:99\" in glitchy cyan light.\nDealers and beggars in shadows. Multiple neon signs pointing different directions.\nHeart of the underground. Busy, dangerous, alive with activity.\nColors: chaotic mix of neon signs - pink, blue, green, yellow\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#9B59B6",
+        "#3498DB",
+        "#E74C3C",
+        "#2ECC71"
+      ]
+    },
+    "plaza": {
+      "name": "Black Market Plaza",
+      "prompt": "\nChaotic underground marketplace with illegal goods on display.\nOrgan jars next to food stalls. Corrupted hologram advertisements.\nNeon signs in multiple languages. Dense crowd of shady characters.\nCyberpunk bazaar atmosphere. Capitalism without rules.\nColors: chaotic mix of neon signs - pink, blue, green, yellow\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#FF1493",
+        "#00FFFF",
+        "#FFD700",
+        "#32CD32"
+      ]
+    },
+    "clinic": {
+      "name": "Underground Clinic",
+      "prompt": "\nIllegal cybernetic surgery clinic. Operating table with blood stains.\nMedical equipment mixed with hacking tools. Jars with implants.\nDr. Splice's workspace - professional chaos. Sign reads \"Results not guaranteed\".\nClinical white mixed with warning red and chrome medical equipment.\nColors: warm orange and clinical white with blood red accents\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#FFFFFF",
+        "#FF0000",
+        "#C0C0C0",
+        "#FF6600"
+      ]
+    },
+    "terminal": {
+      "name": "Abandoned Terminal",
+      "prompt": "\nDerelict subway station frozen in time since 2078. Rusted train cars.\nVending machine still glowing, offering Coca-Cola for $0.99.\nRadiation warning signs near sealed tunnel. Dust and decay everywhere.\nRetrofuturism meets post-apocalypse. Nostalgic yet dangerous.\nColors: rust orange, toxic green, warning yellow\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#8B4513",
+        "#FFD700",
+        "#FF4500",
+        "#808080"
+      ]
+    },
+    "lair": {
+      "name": "Chrome Lair",
+      "prompt": "\nCyborg gang headquarters. Charging towers with humanoids plugged in.\nChrome and steel everywhere. Red LED eyes scanning. Industrial aesthetics.\n\"ARE YOU HUMAN?\" graffiti. Aggressive, territorial, mechanical.\nHeavy metal meets flesh. Dehumanization visualized.\nColors: aggressive red and chrome silver\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#C0C0C0",
+        "#FF0000",
+        "#1C1C1C",
+        "#4169E1"
+      ]
+    },
+    "tunnel": {
+      "name": "Forgotten Tunnel",
+      "prompt": "\nAbandoned maintenance tunnel. Damp, dark, forgotten by the system.\nOld political graffiti and escape route maps. Dripping water.\nPerfect for ghosts who want to stay invisible. Off-grid passage.\nOrganic decay in mechanical space. Nature reclaiming technology.\nColors: bioluminescent green and damp grey\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#2F4F4F",
+        "#00CED1",
+        "#556B2F",
+        "#708090"
+      ]
+    },
+    "server": {
+      "name": "Dead Server Room",
+      "prompt": "\nMassive data center graveyard. Dead servers with blinking residual lights.\nIntense cold - frost on surfaces. Blue LED glow from dying machines.\nDigital archaeologists' heaven. Ghost data and lost secrets.\nCathedral of dead technology. Reverent silence.\nColors: ethereal cyan and gold with digital artifacts\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#0000CD",
+        "#00BFFF",
+        "#F0F8FF",
+        "#483D8B"
+      ]
+    },
+    "bar": {
+      "name": "Bar Overflow",
+      "prompt": "\nUnderground hacker bar. Single robotic arm as bartender behind counter.\nDrink menu in code. Clientele of hackers, assassins, accountants.\nDark wood and chrome. Amber liquid glow. No questions asked.\nDigital noir atmosphere. Dangerous but welcoming.\nColors: deep blue and purple with amber drink glow\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#4B0082",
+        "#FF8C00",
+        "#191970",
+        "#DAA520"
+      ]
+    },
+    "taqueria": {
+      "name": "Taqueria The Last Byte",
+      "prompt": "\nCozy underground taqueria. Warm orange lights. Mechanical arms cooking.\nMenu board with items like \"Al Pastor 2.0\" and \"Carnitas Legacy\".\nDona Kernel's domain - maternal but dangerous. Smells delicious.\nHome in the underground. Comfort food meets cyberpunk.\nColors: dim warm lights against cold steel blue\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#FF6347",
+        "#FFD700",
+        "#8B4513",
+        "#FFA500"
+      ]
+    },
+    "arena": {
+      "name": "The Arena",
+      "prompt": "\nUnderground gladiatorial combat pit. Blood-stained fighting ring.\nSpectator seats around circular arena. Betting boards with odds.\nChrome fighters and organic ones. Victory or death atmosphere.\nRoman colosseum meets robot wars. Brutal entertainment.\nColors: aggressive red and chrome silver\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#8B0000",
+        "#C0C0C0",
+        "#000000",
+        "#FFD700"
+      ]
+    },
+    "temple_satoshi": {
+      "name": "Temple of Satoshi",
+      "prompt": "\nSacred shrine to Bitcoin's anonymous creator. Electric candles flickering.\nMonitor displaying the whitepaper on eternal loop. Gold and cyan glow.\nMonks in hooded robes meditating on decentralization. Genesis block carved in stone.\n\"IN CODE WE TRUST\" plaque. Religious reverence for cryptocurrency.\nColors: ethereal cyan and gold with digital artifacts\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#FFD700",
+        "#00CED1",
+        "#1C1C1C",
+        "#F0E68C"
+      ]
+    },
+    "temple_vitalik": {
+      "name": "Temple of Vitalik",
+      "prompt": "\nMinimalist shrine to Ethereum's creator. Holographic DevCon presentations.\nPurple and silver aesthetic. NFT relics on pedestals. Gas fee debate murals.\n\"MERGE COMPLETE\" poster with eternal flame. Smart contract scripture.\nModern tech temple. Intellectual worship of the world computer.\nColors: ethereal cyan and gold with digital artifacts\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#627EEA",
+        "#C0C0C0",
+        "#9B59B6",
+        "#2ECC71"
+      ]
+    },
+    "temple_toly": {
+      "name": "Temple of Toly",
+      "prompt": "\nNewest crypto temple, dedicated to Solana's architect. Everything is FAST.\nTPS counters and latency clocks. Monkey meme art on walls.\n\"MOVE FAST BREAK THINGS\" banners. Temple crashed during construction (joke).\nSpeed worship. Chaotic energy. Young and brash aesthetic.\nColors: ethereal cyan and gold with digital artifacts\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#14F195",
+        "#9945FF",
+        "#000000",
+        "#FFFFFF"
+      ]
+    },
+    "stairs": {
+      "name": "Stairs to Crimson District",
+      "prompt": "\nEmergency staircase leading up to light. Chrome guard blocking the way.\n\"100 $ABYSS\" price tag glowing. Music and laughter filtering from above.\nTransition from dark underground to bright upper world. Class barrier visualized.\nHope and despair at the threshold. So close yet so far.\nColors: chaotic mix of neon signs - pink, blue, green, yellow\n\nDigital art, cyberpunk aesthetic, dark atmospheric lighting,\nneon glow effects, dystopian future, highly detailed,\ncinematic composition, 16:9 aspect ratio, concept art style,\nBlade Runner meets Akira visual influence\n\n",
+      "colors": [
+        "#DC143C",
+        "#FFD700",
+        "#1C1C1C",
+        "#FFFAF0"
+      ]
+    }
+  }
+}

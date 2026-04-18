@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Abyss - Room Color Palettes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .room-card {
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+        .room-header {
+            padding: 15px;
+            background: #16213e;
+            border-bottom: 1px solid #333;
+        }
+        .room-name {
+            font-size: 1.1em;
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+        .room-key {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .colors {
+            display: flex;
+            height: 60px;
+        }
+        .color-swatch {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            font-size: 0.7em;
+            font-weight: bold;
+            text-shadow: 0 0 3px #000;
+        }
+        .room-desc {
+            padding: 15px;
+            font-size: 0.85em;
+            line-height: 1.5;
+            color: #888;
+            border-top: 1px solid #333;
+        }
+        .category {
+            margin: 40px 0 20px;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #e94560, transparent);
+            font-size: 1.2em;
+            color: #fff;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>⬡ THE ABYSS - COLOR PALETTES ⬡</h1>
+
+    <div class="category">🏥 SPAWN & SERVICES</div>
+    <div class="grid">
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Underground Clinic</div>
+                <div class="room-key">clinic (SPAWN)</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #FFFFFF; color: #000;">#FFFFFF</div>
+                <div class="color-swatch" style="background: #FF0000;">#FF0000</div>
+                <div class="color-swatch" style="background: #C0C0C0; color: #000;">#C0C0C0</div>
+                <div class="color-swatch" style="background: #FF6600;">#FF6600</div>
+            </div>
+            <div class="room-desc">Clinical white, blood red, chrome silver, warning orange</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Taqueria The Last Byte</div>
+                <div class="room-key">taqueria</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #FF6347;">#FF6347</div>
+                <div class="color-swatch" style="background: #FFD700; color: #000;">#FFD700</div>
+                <div class="color-swatch" style="background: #8B4513;">#8B4513</div>
+                <div class="color-swatch" style="background: #FFA500; color: #000;">#FFA500</div>
+            </div>
+            <div class="room-desc">Tomato red, golden yellow, wood brown, warm orange</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Bar Overflow</div>
+                <div class="room-key">bar</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #4B0082;">#4B0082</div>
+                <div class="color-swatch" style="background: #FF8C00;">#FF8C00</div>
+                <div class="color-swatch" style="background: #191970;">#191970</div>
+                <div class="color-swatch" style="background: #DAA520;">#DAA520</div>
+            </div>
+            <div class="room-desc">Deep indigo, dark orange, midnight blue, goldenrod</div>
+        </div>
+    </div>
+
+    <div class="category">🏛️ TEMPLES</div>
+    <div class="grid">
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Temple of Satoshi</div>
+                <div class="room-key">temple_satoshi</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #FFD700; color: #000;">#FFD700</div>
+                <div class="color-swatch" style="background: #00CED1; color: #000;">#00CED1</div>
+                <div class="color-swatch" style="background: #1C1C1C;">#1C1C1C</div>
+                <div class="color-swatch" style="background: #F0E68C; color: #000;">#F0E68C</div>
+            </div>
+            <div class="room-desc">Bitcoin gold, dark turquoise, deep black, khaki</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Temple of Vitalik</div>
+                <div class="room-key">temple_vitalik</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #627EEA;">#627EEA</div>
+                <div class="color-swatch" style="background: #C0C0C0; color: #000;">#C0C0C0</div>
+                <div class="color-swatch" style="background: #9B59B6;">#9B59B6</div>
+                <div class="color-swatch" style="background: #2ECC71;">#2ECC71</div>
+            </div>
+            <div class="room-desc">Ethereum blue, silver, purple, emerald green</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Temple of Toly</div>
+                <div class="room-key">temple_toly</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #14F195; color: #000;">#14F195</div>
+                <div class="color-swatch" style="background: #9945FF;">#9945FF</div>
+                <div class="color-swatch" style="background: #000000;">#000000</div>
+                <div class="color-swatch" style="background: #FFFFFF; color: #000;">#FFFFFF</div>
+            </div>
+            <div class="room-desc">Solana green, Solana purple, black, white</div>
+        </div>
+    </div>
+
+    <div class="category">⚔️ COMBAT & DANGER</div>
+    <div class="grid">
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Chrome Lair</div>
+                <div class="room-key">lair</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #C0C0C0; color: #000;">#C0C0C0</div>
+                <div class="color-swatch" style="background: #FF0000;">#FF0000</div>
+                <div class="color-swatch" style="background: #1C1C1C;">#1C1C1C</div>
+                <div class="color-swatch" style="background: #4169E1;">#4169E1</div>
+            </div>
+            <div class="room-desc">Chrome silver, blood red, jet black, royal blue</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">The Arena</div>
+                <div class="room-key">arena</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #8B0000;">#8B0000</div>
+                <div class="color-swatch" style="background: #C0C0C0; color: #000;">#C0C0C0</div>
+                <div class="color-swatch" style="background: #000000;">#000000</div>
+                <div class="color-swatch" style="background: #FFD700; color: #000;">#FFD700</div>
+            </div>
+            <div class="room-desc">Dark red, silver, black, gold</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Rat Alley</div>
+                <div class="room-key">alley</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #0F0F0F;">#0F0F0F</div>
+                <div class="color-swatch" style="background: #00FF41; color: #000;">#00FF41</div>
+                <div class="color-swatch" style="background: #FF0040;">#FF0040</div>
+                <div class="color-swatch" style="background: #4A4A4A;">#4A4A4A</div>
+            </div>
+            <div class="room-desc">Near black, matrix green, hot pink, dark grey</div>
+        </div>
+    </div>
+
+    <div class="category">🏙️ MAIN AREAS</div>
+    <div class="grid">
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Entrance to the Abyss</div>
+                <div class="room-key">entrance</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #FF6B35;">#FF6B35</div>
+                <div class="color-swatch" style="background: #1A1A2E;">#1A1A2E</div>
+                <div class="color-swatch" style="background: #16213E;">#16213E</div>
+                <div class="color-swatch" style="background: #E94560;">#E94560</div>
+            </div>
+            <div class="room-desc">Neon orange, deep navy, dark blue, hot pink</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Central Crossing</div>
+                <div class="room-key">crossing</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #9B59B6;">#9B59B6</div>
+                <div class="color-swatch" style="background: #3498DB;">#3498DB</div>
+                <div class="color-swatch" style="background: #E74C3C;">#E74C3C</div>
+                <div class="color-swatch" style="background: #2ECC71;">#2ECC71</div>
+            </div>
+            <div class="room-desc">Purple, blue, red, green - chaotic neon mix</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Black Market Plaza</div>
+                <div class="room-key">plaza</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #FF1493;">#FF1493</div>
+                <div class="color-swatch" style="background: #00FFFF; color: #000;">#00FFFF</div>
+                <div class="color-swatch" style="background: #FFD700; color: #000;">#FFD700</div>
+                <div class="color-swatch" style="background: #32CD32;">#32CD32</div>
+            </div>
+            <div class="room-desc">Hot pink, cyan, gold, lime green</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Stairs to Crimson District</div>
+                <div class="room-key">stairs</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #DC143C;">#DC143C</div>
+                <div class="color-swatch" style="background: #FFD700; color: #000;">#FFD700</div>
+                <div class="color-swatch" style="background: #1C1C1C;">#1C1C1C</div>
+                <div class="color-swatch" style="background: #FFFAF0; color: #000;">#FFFAF0</div>
+            </div>
+            <div class="room-desc">Crimson red, gold, black, floral white</div>
+        </div>
+    </div>
+
+    <div class="category">🔧 INDUSTRIAL</div>
+    <div class="grid">
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Rusted Passage</div>
+                <div class="room-key">passage</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #2D3436;">#2D3436</div>
+                <div class="color-swatch" style="background: #00B894;">#00B894</div>
+                <div class="color-swatch" style="background: #FDCB6E; color: #000;">#FDCB6E</div>
+                <div class="color-swatch" style="background: #E17055;">#E17055</div>
+            </div>
+            <div class="room-desc">Dark grey, teal, yellow, salmon</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Abandoned Terminal</div>
+                <div class="room-key">terminal</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #8B4513;">#8B4513</div>
+                <div class="color-swatch" style="background: #FFD700; color: #000;">#FFD700</div>
+                <div class="color-swatch" style="background: #FF4500;">#FF4500</div>
+                <div class="color-swatch" style="background: #808080;">#808080</div>
+            </div>
+            <div class="room-desc">Saddle brown, gold, orange red, grey</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Dead Server Room</div>
+                <div class="room-key">server</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #0000CD;">#0000CD</div>
+                <div class="color-swatch" style="background: #00BFFF; color: #000;">#00BFFF</div>
+                <div class="color-swatch" style="background: #F0F8FF; color: #000;">#F0F8FF</div>
+                <div class="color-swatch" style="background: #483D8B;">#483D8B</div>
+            </div>
+            <div class="room-desc">Medium blue, deep sky blue, alice blue, dark slate blue</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Forgotten Tunnel</div>
+                <div class="room-key">tunnel</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #2F4F4F;">#2F4F4F</div>
+                <div class="color-swatch" style="background: #00CED1;">#00CED1</div>
+                <div class="color-swatch" style="background: #556B2F;">#556B2F</div>
+                <div class="color-swatch" style="background: #708090;">#708090</div>
+            </div>
+            <div class="room-desc">Dark slate grey, dark turquoise, olive, slate grey</div>
+        </div>
+
+        <div class="room-card">
+            <div class="room-header">
+                <div class="room-name">Water Tank</div>
+                <div class="room-key">tank</div>
+            </div>
+            <div class="colors">
+                <div class="color-swatch" style="background: #2C3E50;">#2C3E50</div>
+                <div class="color-swatch" style="background: #E67E22;">#E67E22</div>
+                <div class="color-swatch" style="background: #95A5A6;">#95A5A6</div>
+                <div class="color-swatch" style="background: #3498DB;">#3498DB</div>
+            </div>
+            <div class="room-desc">Midnight blue, carrot orange, concrete grey, peter river blue</div>
+        </div>
+    </div>
+
+    <footer>
+        <p>THE ABYSS - Cyberpunk MUD</p>
+        <p>18 Rooms | Color palettes for visual consistency</p>
+    </footer>
+</body>
+</html>

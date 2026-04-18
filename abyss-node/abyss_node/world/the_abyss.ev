@@ -1,0 +1,248 @@
+#
+# The Abyss - Batch Command File
+# Run with: @batchcommand world.the_abyss
+#
+
+#
+# === ROOMS ===
+#
+
+# 1. Entrada al Abyss
+@dig Entrada al Abyss
+#
+@desc
+Un agujero en el pavimento que alguien decoró con un letrero de neón
+roto que dice "BIEN ENIDO". La 'V' se la robaron hace años. Una
+escalera de metal baja hacia la oscuridad, cada peldaño más oxidado
+que el anterior. Un grafiti promete: "Aquí nadie te juzga (porque
+a nadie le importas)".
+#
+@tag here = the_abyss:zone
+#
+
+# 2. Pasaje Oxidado
+@dig Pasaje Oxidado
+#
+@desc
+Un corredor que algún arquitecto diseñó pensando en "eficiencia" y
+terminó siendo una trampa de tétanos. Las tuberías gotean algo verde
+que nadie quiere analizar. Una pantalla rota repite "SISTEMA OFFLINE"
+desde 2089. Técnicamente es arte contemporáneo ahora.
+#
+@tag here = the_abyss:zone
+#
+
+# 3. Callejón de las Ratas
+@dig Callejón de las Ratas
+#
+@desc
+Un callejón sin salida que las ratas genéticamente modificadas han
+reclamado como república independiente. Tienen su propia economía
+basada en cables de cobre. Un grafiti dice: "Los Ghosts no olvidan"
+y alguien agregó abajo: "Pero sí perdonan por $ABYSS".
+#
+@tag here = the_abyss:zone
+#
+
+# 4. Tanque de Agua
+@dig Tanque de Agua
+#
+@desc
+Un tanque industrial que prometía "agua potable para todos" en 2045.
+Ahora es un Airbnb para refugiados con reviews de una estrella.
+Hamacas cuelgan como telarañas metálicas. Una familia te mira con
+la hospitalidad de quien ya vendió todo lo que podía vender.
+#
+@tag here = the_abyss:zone
+#
+
+# 5. Cruce Central
+@dig Cruce Central
+#
+@desc
+El corazón del Abyss, donde cuatro túneles convergen bajo un reloj
+holográfico que marca las 99:99 desde el colapso. Los dealers venden
+sueños a crédito. Los mendigos aceptan crypto. Un predicador grita
+sobre el fin del mundo - lleva razón pero nadie le hace caso.
+#
+@tag here = the_abyss:zone
+#
+
+# 6. Plaza del Mercado Negro
+@dig Plaza del Mercado Negro
+#
+@desc
+Capitalismo en su forma más pura: sin regulaciones, sin impuestos,
+sin garantías. Puestos venden órganos "ligeramente usados" junto
+a tacos de procedencia cuestionable. Un holograma corrupto anuncia
+ofertas que expiraron hace décadas. El olor es indescriptible,
+y eso es un cumplido.
+#
+@tag here = the_abyss:zone
+#
+
+# 7. Clínica Clandestina (SPAWN)
+@dig Clínica Clandestina
+#
+@desc
+Despiertas en una mesa de operaciones que ha visto mejores días
+(y peores pacientes). El Dr. Splice te mira con una mezcla de
+orgullo profesional y decepción personal. "Sobreviviste. Te debo
+$50 ABYSS, aposté en contra." Un cartel dice: "Instalaciones y
+Extracciones - Resultados no garantizados pero sí memorables."
+#
+@tag here = the_abyss:zone
+#
+@tag here = spawn:special
+#
+
+# 8. Terminal Abandonada
+@dig Terminal Abandonada
+#
+@desc
+Una estación de metro donde el último tren pasó en 2078. Los vagones
+ahora son condominios de lujo (para estándares del Abyss). Una
+máquina expendedora sigue intentando venderte una Coca-Cola por
+$0.99 - la inflación no llegó aquí. El túnel sellado tiene carteles
+de radiación que probablemente son exagerados. Probablemente.
+#
+@tag here = the_abyss:zone
+#
+
+# 9. Guarida Chrome
+@dig Guarida Chrome
+#
+@desc
+Territorio Chrome. Aquí el debate "¿cuánto metal te hace dejar de ser
+humano?" se resuelve con violencia. Cyborgs enchufados a torres de
+carga te escanean con ojos LED. Una voz sintética pregunta: "¿Vienes
+en paz o en piezas?" No es pregunta retórica.
+#
+@tag here = the_abyss:zone
+#
+
+# 10. Túnel Olvidado
+@dig Túnel Olvidado
+#
+@desc
+Un túnel de mantenimiento que el sistema olvidó actualizar, hackear,
+o demoler. Los Ghosts lo usan para moverse sin dejar rastro on-chain.
+Grafitis antiguos muestran rutas de escape que ya no existen y
+promesas políticas que nunca se cumplieron. El olor a humedad es
+gratis, como todo lo bueno aquí.
+#
+@tag here = the_abyss:zone
+#
+
+# 11. Servidor Muerto
+@dig Servidor Muerto
+#
+@desc
+Un cementerio de datos donde los servidores muertos parpadean con
+vida residual. Hackers vienen a buscar información perdida como
+arqueólogos digitales. El frío es brutal - los sistemas de enfriamiento
+siguen funcionando porque nadie recuerda cómo apagarlos. Dicen que
+aquí se almacenó el primer bloque de Bitcoin. Es mentira, pero vende.
+#
+@tag here = the_abyss:zone
+#
+
+# 12. Bar Overflow
+@dig Bar Overflow
+#
+@desc
+Un bar llamado así por el bug que lo fundó (alguien hackeó una ATM).
+El bartender es un brazo robótico que mezcla tragos con precisión
+milimétrica y cero personalidad. La clientela incluye hackers,
+asesinos, y contadores - los tres igual de peligrosos. Happy hour
+es cuando no hay balacera.
+#
+@tag here = the_abyss:zone
+#
+
+# 13. Taquería El Último Byte
+@dig Taquería El Último Byte
+#
+@desc
+La mejor taquería del Abyss (y la única). Doña Kernel sirve tacos
+de proteína sintética que saben sospechosamente bien. Nadie pregunta
+de qué son. El menú tiene opciones como "Al Pastor 2.0", "Carnitas
+Legacy" y "Suadero Sin Bugs". Acepta $ABYSS y trueque. El horario
+es "cuando Doña Kernel quiera".
+#
+@tag here = the_abyss:zone
+#
+
+# 14. La Arena
+@dig La Arena
+#
+@desc
+Un pit de combate donde los Chromes resuelven disputas, los apostadores
+pierden fortunas, y los gladiadores pierden extremidades. Las reglas
+son simples: entra vivo, sal como puedas. Un letrero dice "No nos
+hacemos responsables por daños, muerte, o pérdida de identidad
+on-chain". La entrada cuesta, la salida cuesta más.
+#
+@tag here = the_abyss:zone
+#
+
+# 15. Templo de Satoshi
+@dig Templo de Satoshi
+#
+@desc
+Un santuario dedicado al profeta anónimo que creó Bitcoin y desapareció.
+Velas eléctricas parpadean frente a un monitor que muestra el whitepaper
+en loop. Los fieles meditan sobre la descentralización mientras un
+monje recita el génesis block. Una placa dice: "In Code We Trust".
+Donaciones solo en BTC (obvio).
+#
+@tag here = the_abyss:zone
+#
+@tag here = temple:special
+#
+
+# 16. Templo de Vitalik
+@dig Templo de Vitalik
+#
+@desc
+Un espacio minimalista dedicado al joven eterno que prometió la
+computadora mundial. Hologramas muestran conferencias de ETH DevCon
+en loop infinito. Los devotos debaten sobre gas fees y layer 2s
+como si fueran textos sagrados. Un póster dice "Merge Complete"
+junto a una vela que nunca se apaga. Los NFTs aquí son reliquias.
+#
+@tag here = the_abyss:zone
+#
+@tag here = temple:special
+#
+
+# 17. Templo de Toly
+@dig Templo de Toly
+#
+@desc
+El más nuevo de los templos, dedicado al arquitecto de Solana.
+Todo aquí es RÁPIDO. Los monjes hablan en TPS. Un reloj muestra
+latencia en milisegundos. Posters de "Move Fast Break Things"
+adornan las paredes junto a memes de monos. El templo se cayó
+tres veces durante la construcción pero "ya está estable" (dicen).
+#
+@tag here = the_abyss:zone
+#
+@tag here = temple:special
+#
+
+# 18. Escalera a Crimson District
+@dig Escalera a Crimson District
+#
+@desc
+Una escalera de emergencia hacia el Crimson District, donde la vida
+es cara pero al menos hay luz natural (artificial). Un guardia Chrome
+bloquea el paso. "¿Traes 100 $ABYSS? No. Entonces vuelve cuando
+tengas algo que ofrecer además de esperanza." Arriba se escucha
+música y risas de gente que puede pagarlas.
+#
+@tag here = the_abyss:zone
+#
+@tag here = locked:special
+#
+

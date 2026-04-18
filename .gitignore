@@ -1,0 +1,34 @@
+# Secrets — NUNCA commitear
+deploy/.env
+deploy/game_wallet.json
+*.key
+.env.local
+.env.production
+
+# Python / venv
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Evennia runtime
+abyss-node/abyss_node/server/*.pid
+abyss-node/abyss_node/server/logs/
+*.db3
+*.sqlite3
+
+# Foundry build artifacts (el source + broadcast records sí se commitean)
+contracts/cache/
+contracts/out/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+.claude/
+
+# Logs temporales
+/tmp/*.log
+*.log

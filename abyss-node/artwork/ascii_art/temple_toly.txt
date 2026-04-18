@@ -1,0 +1,13 @@
+# Temple of Toly
+
+. . . . .[ WIRE_HARNESS // DATA_SPEED: CRITICAL ] . . . . .
+   /                                                     \
+--+-----[ TEMPLE OF TOLY ]-------[ LATENCY: 008ms ]-------+--
+  |      'SOLANA ARCHITECT'       '::::::::::::::::'      |
+[POSTER]      _   _  ALTAR  _   _                       [POSTER]
+[MOVE  ]     / \_/ \_[XXX]_/ \_/ \                      [BREAK ]
+[FAST! ]  __|_| H |_|[:I:]|_| H |_|__  < "65,000 TPS."  [THINGS]
+  '--'   [MONK] O [SERVER] O [MONK]                      '--'
+         '----'[_] [NODE] [_]'----'    < "71,200 TPS."
+. . . . . . // / \ /CABLES\ / \ \\ . . . . . . . . . . . . .
+ : : : : : [###_UNDERGROUND_GRID_###] : : : : : : : : : : :

@@ -1,0 +1,15 @@
+# Temple of Vitalik
+
+#~...___.[ WIRE CONDUITS & DATA CABLES ]_..___...~#.._
+|  :  ...    *flicker*      ...      *hum*    ...   :  |
+|  :  [HOLO: DEVCON STAGE]       [HOLO: ETH STATS]  :  |
+|  :  | > Vitalik Speaks |       | Gas: 145 gwei   |  :  |
+|  :  | > "World Compute"|       | Tps: 12.5       |  :  |
+|  :  +---~.~.~----------+       +---------~.~.~---+  :  |
+| =====================\\      //======================|
+|          .     .      \\(><)//      .     .          |
+|    @  .   @    .       | == |      .    @   .  @     |
+|   /|\    /|\   .      /______\  .      /|\    /|\    |
+| ("L2 will save")    [THE_COMPUTER]   ("Fees tho..")  |
+| ("Too poor..")      [>_CONNECT...]    ("ZK-SNARKs")  |
+|......................................................|
