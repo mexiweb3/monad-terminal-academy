@@ -188,3 +188,53 @@ footer{background:var(--bg-2);padding:48px 0 72px}
 
 #status.ok{color:var(--accent)}
 #status.down{color:var(--danger)}
+
+/* ===== ASCII ART decorations ===== */
+.ascii-term, .ascii-flow, .ascii-coin, .ascii-banner {
+  font-family: var(--mono);
+  white-space: pre;
+  line-height: 1.15;
+  margin: 0 0 28px;
+  overflow-x: auto;
+}
+
+.ascii-term {
+  color: var(--accent);
+  font-size: clamp(9px, 1.1vw, 13px);
+  text-shadow: 0 0 8px rgba(57,255,20,.25);
+  padding: 4px 0;
+  margin: 0 0 28px;
+}
+.ascii-term .ok { color: var(--accent-2); font-weight: 700; }
+.ascii-term .hl { color: var(--term); font-weight: 700; }
+.ascii-term .caret {
+  display: inline-block;
+  color: var(--accent);
+  animation: blink 1.1s steps(2) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.ascii-flow {
+  color: var(--accent-2);
+  font-size: clamp(9px, 1.1vw, 13px);
+  text-shadow: 0 0 10px rgba(0,209,255,.25);
+  margin: 0 auto 32px;
+  text-align: center;
+}
+
+.ascii-coin {
+  color: var(--term);
+  font-size: clamp(9px, 1.1vw, 13px);
+  text-align: center;
+  text-shadow: 0 0 12px rgba(255,209,102,.35);
+  margin: 0 auto 24px;
+}
+
+.ascii-banner {
+  color: var(--accent-3);
+  font-size: clamp(8px, 1vw, 12px);
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255,154,60,.35);
+  margin: 0 auto 28px;
+  letter-spacing: .02em;
+}

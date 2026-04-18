@@ -6,10 +6,31 @@ Config leída de /deploy/.env (fuera del repo).
 """
 
 import os
+import threading
 from pathlib import Path
 
 from dotenv import load_dotenv
 from web3 import Web3
+
+
+# Serializa las tx del claim para evitar nonce collision cuando varios
+# jugadores hacen `claim` al mismo tiempo (hot wallet compartida).
+_send_lock = threading.Lock()
+_nonce_cache = {"addr": None, "next": None}
+
+
+def _next_nonce(w3, addr: str) -> int:
+    """Nonce incrementado en memoria; resetea al RPC al primer uso o tras fallo."""
+    if _nonce_cache["addr"] != addr or _nonce_cache["next"] is None:
+        _nonce_cache["addr"] = addr
+        _nonce_cache["next"] = w3.eth.get_transaction_count(addr, "pending")
+    n = _nonce_cache["next"]
+    _nonce_cache["next"] = n + 1
+    return n
+
+
+def _reset_nonce_cache():
+    _nonce_cache["next"] = None
 
 
 # Carga /deploy/.env relativo al repo (monadmty/)
@@ -155,17 +176,25 @@ def send_abyss(to_address: str, amount_whole: int) -> tuple[str, str]:
     to_cs = Web3.to_checksum_address(to_address)
     value = int(amount_whole) * (10 ** 18)
 
-    nonce = w3.eth.get_transaction_count(acct.address)
-    tx = contract.functions.transfer(to_cs, value).build_transaction({
-        "from": acct.address,
-        "nonce": nonce,
-        "chainId": CHAIN_ID,
-        "gas": 120_000,
-        "gasPrice": w3.eth.gas_price,
-    })
-    signed = acct.sign_transaction(tx)
-    raw = getattr(signed, "rawTransaction", None) or getattr(signed, "raw_transaction", None)
-    tx_hash = w3.eth.send_raw_transaction(raw)
+    # Serializa la construcción+envío para que nonces y gas_price no colisionen
+    with _send_lock:
+        try:
+            nonce = _next_nonce(w3, acct.address)
+            tx = contract.functions.transfer(to_cs, value).build_transaction({
+                "from": acct.address,
+                "nonce": nonce,
+                "chainId": CHAIN_ID,
+                "gas": 120_000,
+                "gasPrice": w3.eth.gas_price,
+            })
+            signed = acct.sign_transaction(tx)
+            raw = getattr(signed, "rawTransaction", None) or getattr(signed, "raw_transaction", None)
+            tx_hash = w3.eth.send_raw_transaction(raw)
+        except Exception:
+            # Fallback: reset cache para re-sync desde RPC en el siguiente claim
+            _reset_nonce_cache()
+            raise
+
     tx_hex = tx_hash.hex() if hasattr(tx_hash, "hex") else str(tx_hash)
     if not tx_hex.startswith("0x"):
         tx_hex = "0x" + tx_hex

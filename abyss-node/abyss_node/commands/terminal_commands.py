@@ -97,23 +97,32 @@ def _write_player_file(caller, loc, fname, content, append=False):
     return True
 
 
+def _emit_prompt(caller):
+    """Muestra el prompt tipo shell al final de cada comando (user@academy:/path$)."""
+    loc = caller.location
+    path = f"/academy/{loc.key}" if loc else "/academy"
+    name = caller.key or "you"
+    try:
+        caller.msg(prompt=f"|g{name}@academy|n:|c{path}|n|w$|n ")
+    except Exception:
+        pass
+
+
 def _reward_if_quest(caller, cmd_key):
     """Si este comando completa una quest pendiente, aplica reward y notifica."""
     _ensure_state(caller)
     quest = QUEST_BY_CMD.get(cmd_key)
-    if not quest:
-        return
-    if quest["id"] in caller.db.quest_done:
-        return
-    caller.db.quest_done.append(quest["id"])
-    caller.db.abyss_pending += quest["reward"]
-    caller.msg(
-        f"\n|g╭─ QUEST COMPLETADA ────────────────╮|n\n"
-        f"|g│|n  {quest['desc']}\n"
-        f"|g│|n  |y+{quest['reward']} $TERM|n pendientes — total |y{caller.db.abyss_pending}|n\n"
-        f"|g│|n  Cuando tengas wallet linkeada, usa |w|lcclaim|ltclaim|le|n para reclamar onchain.\n"
-        f"|g╰────────────────────────────────────╯|n"
-    )
+    if quest and quest["id"] not in caller.db.quest_done:
+        caller.db.quest_done.append(quest["id"])
+        caller.db.abyss_pending += quest["reward"]
+        caller.msg(
+            f"\n|g╭─ QUEST COMPLETADA ────────────────╮|n\n"
+            f"|g│|n  {quest['desc']}\n"
+            f"|g│|n  |y+{quest['reward']} $TERM|n pendientes — total |y{caller.db.abyss_pending}|n\n"
+            f"|g│|n  Cuando tengas wallet linkeada, usa |w|lcclaim|ltclaim|le|n para reclamar onchain.\n"
+            f"|g╰────────────────────────────────────╯|n"
+        )
+    _emit_prompt(caller)
 
 
 # ---------- Comandos terminal básicos ----------
@@ -201,19 +210,52 @@ class CmdCD(Command):
         _ensure_state(caller)
         arg = (self.args or "").strip()
         _record_history(caller, "cd", arg)
-        if not arg:
-            caller.msg("usage: cd <destino>")
-            return
         loc = caller.location
         if not loc:
             caller.msg("(sin ubicación)")
             return
-        target_name = "back" if arg == ".." else arg
+
+        # cd sin args → /home
+        if not arg:
+            from evennia.utils.search import search_object
+            from typeclasses.rooms import Room
+            home_rooms = search_object("home", typeclass=Room)
+            if home_rooms:
+                caller.db.last_room = loc
+                caller.move_to(home_rooms[0], quiet=False)
+                _reward_if_quest(caller, "cd")
+            else:
+                caller.msg("cd: no hay home room")
+            return
+
+        # cd - → último dir
+        if arg == "-":
+            last = caller.db.last_room
+            if last:
+                caller.db.last_room = loc
+                caller.move_to(last, quiet=False)
+                _reward_if_quest(caller, "cd")
+            else:
+                caller.msg("cd: OLDPWD no establecido")
+            return
+
+        # `..` busca exit literal "..", con fallback al alias "back"
+        target_name = arg
         for ex in loc.exits:
-            if ex.key.lower() == target_name.lower() or target_name.lower() in [a.lower() for a in ex.aliases.all()]:
+            aliases = [a.lower() for a in ex.aliases.all()]
+            if ex.key.lower() == target_name.lower() or target_name.lower() in aliases:
+                caller.db.last_room = loc
                 ex.at_traverse(caller, ex.destination)
                 _reward_if_quest(caller, "cd")
                 return
+        # Fallback histórico: si el usuario tipea `..`, intenta un exit llamado "back"
+        if arg == "..":
+            for ex in loc.exits:
+                if ex.key.lower() == "back":
+                    caller.db.last_room = loc
+                    ex.at_traverse(caller, ex.destination)
+                    _reward_if_quest(caller, "cd")
+                    return
         caller.msg(f"cd: no such directory: {arg}")
 
 
@@ -288,7 +330,7 @@ class CmdTOUCH(Command):
 
 class CmdMKDIR(Command):
     """
-    Crea un "directorio" virtual (efímero, sin navegación).
+    Crea un subdirectorio real — podés entrar con `cd <nombre>`.
 
     Usage:
       mkdir <nombre>
@@ -305,19 +347,44 @@ class CmdMKDIR(Command):
         if not arg:
             caller.msg("usage: mkdir <nombre>")
             return
+        if "/" in arg or arg.startswith(".") or len(arg) > 40:
+            caller.msg(f"mkdir: nombre inválido: {arg}")
+            return
         loc = caller.location
         if not loc:
             caller.msg("(sin ubicación)")
             return
-        files = caller.db.fs_files.setdefault(loc.dbref, {})
-        # Marcamos como directorio con prefijo '.d/' para distinguir en ls
-        dkey = arg + "/"
-        if dkey in files:
-            caller.msg(f"mkdir: cannot create directory '{arg}': File exists")
-            return
-        files[dkey] = "(directorio)"
-        caller.db.fs_files = caller.db.fs_files
-        caller.msg(f"(creado) {dkey}")
+        # Si ya existe un exit con ese nombre, abortar
+        for ex in loc.exits:
+            if ex.key.lower() == arg.lower():
+                caller.msg(f"mkdir: cannot create directory '{arg}': File exists")
+                return
+
+        # Crear room real + exit ida + exit vuelta
+        from evennia import create_object
+        from typeclasses.rooms import Room
+        from typeclasses.exits import Exit
+
+        new_room = create_object(Room, key=arg)
+        new_room.db.desc = (
+            f"|c{arg}/|n — subdirectorio creado por |w{caller.key}|n.\n"
+            f"\nDirectorio vacío. Usá |wtouch <archivo>|n para crear archivos "
+            f"o |wcd ..|n para volver."
+        )
+        new_room.db.academy_files = {}
+
+        create_object(Exit, key=arg, location=loc, destination=new_room)
+        create_object(
+            Exit,
+            key="..",
+            aliases=["back", loc.key.lower()],
+            location=new_room,
+            destination=loc,
+        )
+
+        caller.msg(
+            f"(creado) |c{arg}/|n — entrá con |wcd {arg}|n, volvé con |wcd ..|n"
+        )
         _reward_if_quest(caller, "mkdir")
 
 
@@ -983,12 +1050,27 @@ AVAILABLE_SKILLS = {
         "author": "Austin Griffith",
         "desc": "Deploy directo a Monad testnet + helpers de faucet + config RPC.",
     },
+    "portdeveloper/monad-development": {
+        "name": "Monad development (oficial)",
+        "author": "portdeveloper",
+        "desc": (
+            "Skill real open-source para Monad: Foundry + viem + wagmi, faucet "
+            "via agents.devnads.com, verificación automática en MonadVision + "
+            "Socialscan + Monadscan, evmVersion 'prague' por default."
+        ),
+    },
     "anthropic/claude-code-guide": {
         "name": "Claude Code usage guide",
         "author": "Anthropic",
         "desc": "Cómo usar Claude Code CLI eficientemente (hooks, slash commands, MCP).",
     },
 }
+
+# Skills que desbloquean `claude deploy` en Monad testnet.
+DEPLOY_ENABLING_SKILLS = frozenset({
+    "austin-griffith/monad-kit",
+    "portdeveloper/monad-development",
+})
 
 
 _CONTRACT_TEMPLATE = """// SPDX-License-Identifier: MIT
@@ -1233,10 +1315,13 @@ class CmdClaude(Command):
         if "contract " not in src:
             caller.msg(f"|rclaude deploy:|n {fname} no parece Solidity (sin `contract`).")
             return
-        if "austin-griffith/monad-kit" not in (caller.db.installed_skills or []):
+        installed = set(caller.db.installed_skills or [])
+        if not (installed & DEPLOY_ENABLING_SKILLS):
             caller.msg(
-                "|yclaude:|n para deployar en Monad necesitas el skill monad-kit.\n"
-                "Instala: |wclaude skills install austin-griffith/monad-kit|n"
+                "|yclaude:|n para deployar en Monad necesitas un skill con soporte de deploy.\n"
+                "Instala uno: |wclaude skills install austin-griffith/monad-kit|n\n"
+                "           o: |wclaude skills install portdeveloper/monad-development|n "
+                "(oficial — incluye verificación auto en MonadVision/Socialscan/Monadscan)"
             )
             return
 
@@ -1251,6 +1336,14 @@ class CmdClaude(Command):
         deployed.append({"file": fname, "address": fake_addr, "tx": fake_tx})
         caller.db.deployed_contracts = deployed
 
+        # Si instaló el skill oficial con auto-verify, mostramos una línea extra
+        verify_line = ""
+        if "portdeveloper/monad-development" in installed:
+            verify_line = (
+                f"|g│|n  verify:   |gauto-verificado|n en MonadVision + Socialscan + Monadscan\n"
+                f"|g│|n            POST agents.devnads.com/v1/verify (skill portdeveloper)\n"
+            )
+
         caller.msg(
             f"\n|g╭─ claude deploy → Monad testnet ──────────────────╮|n\n"
             f"|g│|n  source:   |w{fname}|n ({src.count(chr(10))} líneas)\n"
@@ -1258,6 +1351,7 @@ class CmdClaude(Command):
             f"|g│|n  address:  |y{fake_addr}|n\n"
             f"|g│|n  tx:       |w{fake_tx}|n\n"
             f"|g│|n  explorer: https://testnet.monadexplorer.com/address/{fake_addr}\n"
+            f"{verify_line}"
             f"|g│|n  |x(deploy simulado — para deploy real usa Foundry + PRIVATE_KEY)|n\n"
             f"|g╰──────────────────────────────────────────────────╯|n"
         )

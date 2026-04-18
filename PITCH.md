@@ -10,7 +10,7 @@
 > La primera vez que abrí bash, cerré la laptop. Hoy construimos una solución onchain para que ningún principiante vuelva a sentir eso.
 > Los invito a **Monad Terminal Academy**."
 
-*(mientras hablas, abres https://die-hand-alexandria-joan.trycloudflare.com/webclient/ en pantalla completa)*
+*(mientras hablas, abres [https://blitz.mexi.wtf/webclient/](https://blitz.mexi.wtf/webclient/) en pantalla completa)*
 
 ---
 
@@ -27,8 +27,7 @@
 
 - Las **salas = directorios** (9 rooms encadenadas: `/home` → `ls_dojo` → `cd_dojo` → `cat_dojo` → `mkdir_dojo` → `pipe_dojo` → `redirect_dojo` → `final_exam` → **`claude_dojo`**).
 - Los **items = archivos** (`README.txt`, `log.txt`, `secret.txt`, cheatsheets).
-- **19 comandos REALES** de terminal: desde `ls` / `cd` / `cat` hasta `grep` / `echo` con pipes `|`, redirects `>` `>>`, `head` / `tail` / `wc` / `man` / `history` — y un comando **`claude`** que enseña a usar IA desde la terminal (skills, scaffold de contratos, deploy).
-- El webclient soporta **↑↓ para history y TAB para autocomplete**, igual que bash de verdad.
+- **19 comandos REALES** de terminal con comportamiento de shell real: **prompt dinámico** (`tunombre@academy:/academy/ls_dojo$`), **`↑↓` history**, **`Tab` autocomplete**, `cd -` para OLDPWD, `mkdir` que crea directorios navegables. Y un comando **`claude`** que enseña a pair-programar con IA desde la terminal.
 - Cada comando aprendido completa una **quest** → acumula `$TERM`. 19 quests, **540 `$TERM`** al completar todo.
 - Cuando el jugador linkea su wallet con `link 0x...` y corre `claim`, recibe sus `$TERM` **onchain en Monad testnet**.
 
@@ -46,40 +45,41 @@ Ticket promedio: $5 USD/alumno/mes en B2C, $20k USD/deploy en B2B.
 
 ## 4️⃣ ¿Cómo usa Monad? (30 s)
 
-- `$TERM` es **ERC-20 en Monad testnet** (contrato `0x6BCC8bA023faD77Fd9c16735fD0DCb030F1b03d8`).
-- Cada `claim` es una **transferencia onchain** firmada por la hot wallet del juego — ya hicimos [demo live tx hoy](https://testnet.monadexplorer.com/tx/0x76544f781503b8b9b0205545ef0d3958f196ebf6b62bbd78f9364cfb8089567e).
-- **¿Por qué Monad y no Base/Arbitrum?** El high-TPS es clave cuando escale a miles de estudiantes completando quests en paralelo. Cada comando ejecutado puede ser un evento onchain sin blowup de gas — **eso solo lo hace posible Monad**.
-- Roadmap: burns de $TERM para desbloquear contenido, mint de NFT de certificación (ERC-721), eventualmente leaderboard global onchain.
+- `$TERM` es **ERC-20 en Monad testnet** (contrato [`0x6BCC…03d8`](https://testnet.monadexplorer.com/address/0x6BCC8bA023faD77Fd9c16735fD0DCb030F1b03d8)).
+- Cada `claim` es una **transferencia onchain** firmada por la hot wallet del juego — demo en vivo muestra la [tx real](https://testnet.monadexplorer.com/tx/0xdcd3c747551ebc8f30e88cf891a791cce3734c11fdff4d26e9c76b08b7b3e55b).
+- **Diseñado para escalar en Monad**: implementamos **nonce locking** en el server — `threading.Lock` con nonce en caché que permite **10 claims/seg** por hot wallet sin colisión. Con el high-TPS de Monad (10k TPS, 1 bloque/seg), cada comando ejecutado puede ser un evento onchain sin blowup de gas.
+- Roadmap: burns de $TERM para desbloquear contenido, mint de NFT de certificación (ERC-721), leaderboard global onchain (ya tenemos el código para leer eventos Transfer del contrato).
 
 ## 5️⃣ Validación / aprendizaje (20 s)
 
-- **Construido en 1 día** por este equipo — stack nuevo (Evennia + Foundry + Monad testnet) integrado end-to-end.
-- **Smoke test completo**: jugador nuevo `create demostudent ...` completa 19 quests con 0 errores → `claim` onchain con tx real en el explorer en la primera corrida.
-- **Aprendizaje clave**: principiantes responden al gameplay ANTES que al código. El token onchain es el gancho, el aprendizaje es el producto. Añadir el comando `claude` abrió una capa no planeada — **enseñamos terminal Y enseñamos a pair-program con IA**, que es el stack real del dev 2026.
-- **Riesgo principal**: UX del webclient todavía asusta a no-técnicos → siguiente iteración: modo "novato absoluto" con NPC instructor guiado (Prof. Shell, ya en la base).
+- **Construido en 1 día** por este equipo — stack nuevo (Evennia + Foundry + Monad testnet) integrado end-to-end, desplegado en producción con TLS.
+- **Smoke test completo**: jugador nuevo `create demostudent …` completa 19 quests con 0 errores → `claim` onchain con tx real en el explorer en la primera corrida.
+- **Stress test concurrente**: 3 claims simultáneos tardan **0.4 segundos** con 3 tx hashes distintos — nonce locking funciona bajo carga.
+- **Aprendizaje clave**: principiantes responden al gameplay ANTES que al código. El token onchain es el gancho, el aprendizaje es el producto. Añadir el comando `claude` abrió una capa no planeada — **enseñamos terminal Y enseñamos a pair-programar con IA**, que es el stack real del dev 2026.
 
 ## 🎤 Cierre (10 s)
 
 > "Si creen que web3 necesita onboarding mejor, esta es nuestra apuesta.
 > **Monad Terminal Academy. Aprendes terminal, te llevas tokens reales.**
-> Play ahora: `die-hand-alexandria-joan.trycloudflare.com/webclient/` · Repo: [próximamente] · Gracias."
+> Play ahora: `blitz.mexi.wtf` · Repo: `github.com/mexiweb3/monad-terminal-academy` · Gracias."
 
 ---
 
 ## Assets a tener listos en pantalla
 
-1. Webclient abierto en `/home` con el banner ANSI visible
-2. Tab del navegador con `testnet.monadexplorer.com/tx/0x76544f...089567e`
-3. Tab con este PITCH.md por si pierdes el hilo
-4. Tab con el landing `aka-warning-old-geneva.trycloudflare.com`
+1. **Webclient** abierto en `https://blitz.mexi.wtf/webclient/` con el banner ANSI + prompt visible
+2. **Landing** `https://blitz.mexi.wtf/` en otra pestaña (muestra ASCII art + quests + stats)
+3. **Explorer** `https://testnet.monadexplorer.com/tx/0xdcd3c7…b3e55b` con tx confirmada
+4. **GitHub** `https://github.com/mexiweb3/monad-terminal-academy` con README + screenshots
 
 ## Plan B si la demo falla
 
-- Screenshots pre-capturados en `docs/pitch/screenshots/`
-- Mencionar: "el demo corre en local via Cloudflare Quick Tunnel — URL pública efímera pero reproducible con un solo comando". Muestras el código en 5 s.
+- Screenshots pre-capturados en `docs/pitch/screenshots/` (10 imágenes cubriendo login → claim).
+- Si el dominio no resuelve: acceso por IP directa `http://178.156.198.144:4101/webclient/`.
+- Si el VPS tiene un hipo: backup en Cloudflare Quick Tunnel desde local (generable en 5 s con un comando).
 
 ## Notas
 
-- **Duración real**: 2:40 aprox. 20 s de buffer para aplausos/transiciones.
-- **Tono**: energía alta, directo, español coloquial. Evita tecnicismos innecesarios (no todos los jueces son devs).
+- **Duración real**: ~2:45. 15 s de buffer para aplausos/transiciones.
+- **Tono**: energía alta, directo, español neutral. Evita tecnicismos innecesarios (no todos los jueces son devs).
 - **El número mágico**: `$10,000 MXN` = primer premio. Cada segundo cuenta.

@@ -79,6 +79,11 @@ def _recommend_next(caller, quests):
          priorizar ese flujo: install → new → deploy.
       3. Si todo completo, guiar a link/claim según wallet + pending.
     """
+    try:
+        from commands.terminal_commands import DEPLOY_ENABLING_SKILLS
+    except Exception:
+        DEPLOY_ENABLING_SKILLS = frozenset(("austin-griffith/monad-kit",))
+
     done = set(caller.db.quest_done or [])
     installed = list(caller.db.installed_skills or [])
     deployed = list(caller.db.deployed_contracts or [])
@@ -86,13 +91,15 @@ def _recommend_next(caller, quests):
     pending = int(caller.db.abyss_pending or 0)
 
     loc_key = (caller.location.key if caller.location else "") or ""
+    has_deploy_skill = bool(set(installed) & DEPLOY_ENABLING_SKILLS)
 
     # Atajo contextual: si estás en claude_dojo, prioriza el flujo IA→onchain
     if loc_key == "claude_dojo":
-        if not installed:
+        if not has_deploy_skill:
             return (
-                "  Estás en |cclaude_dojo|n. Instala el kit de Monad:\n"
-                "  |wclaude skills install austin-griffith/monad-kit|n (+40 $TERM)"
+                "  Estás en |cclaude_dojo|n. Instala un kit con soporte de deploy:\n"
+                "  |wclaude skills install portdeveloper/monad-development|n (oficial,\n"
+                "  auto-verify en 3 explorers), o |waustin-griffith/monad-kit|n. (+40 $TERM)"
             )
         if not deployed:
             # ¿Tiene ya un .sol generado en este room?

@@ -10,10 +10,10 @@
     const t = setTimeout(() => ctrl.abort(), 4000);
     await fetch(url, { mode: "no-cors", signal: ctrl.signal });
     clearTimeout(t);
-    el.textContent = "status: online";
+    el.textContent = "estado: online";
     el.classList.add("ok");
   } catch {
-    el.textContent = "status: tunnel down — regenerar";
+    el.textContent = "estado: servidor caído — revisar deploy";
     el.classList.add("down");
   }
 })();

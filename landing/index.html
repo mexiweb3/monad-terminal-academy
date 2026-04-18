@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Monad Terminal Academy — shell + Claude CLI + deploy onchain</title>
-<meta name="description" content="MUD educativo onchain. Aprendés terminal y Claude CLI, deployás tu primer contrato a Monad, y cobrás $TERM al completar quests.">
+<meta name="description" content="MUD educativo onchain. Aprendes terminal y Claude CLI, deployas tu primer contrato en Monad y cobras $TERM al completar quests.">
 <meta property="og:title" content="Monad Terminal Academy">
-<meta property="og:description" content="En 15 min pasás de `ls` a deployar un ERC-20 a Monad. Y cobrás $TERM onchain.">
+<meta property="og:description" content="En 15 min pasas de `ls` a deployar un ERC-20 en Monad. Y cobras $TERM onchain.">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -24,17 +24,28 @@
                               A C A D E M Y
     </pre>
     <p class="tag">De <code class="inline">ls</code> a <code class="inline">claude deploy</code> en 15 minutos.</p>
-    <p class="sub">MUD educativo onchain. Aprendés terminal, instalás skills de Claude CLI, generás un contrato y lo deployás a <strong>Monad testnet</strong>. Cobrás <span class="term">$TERM</span> al completar cada quest.</p>
-    <a class="cta" id="play" href="https://die-hand-alexandria-joan.trycloudflare.com/webclient/" target="_blank" rel="noopener">▶ Jugar ahora</a>
-    <p class="hint">Sin instalación. Abrís en el navegador, creás un usuario, arrancás.</p>
+    <p class="sub">MUD educativo onchain. Aprendes terminal, instalas skills de Claude CLI, generas un contrato y lo deployas en <strong>Monad testnet</strong>. Cobras <span class="term">$TERM</span> al completar cada quest.</p>
+    <pre class="ascii-term" aria-hidden="true">
+┌─ monad@terminal-academy ─────────────────────────────────┐
+│                                                           │
+│  <span class="ok">$</span> ./start.sh                                           │
+│  <span class="ok">[✓]</span> cargando <span class="hl">19</span> quests                              │
+│  <span class="ok">[✓]</span> conectando <span class="hl">Monad testnet</span> (chainId <span class="hl">10143</span>)       │
+│  <span class="ok">[✓]</span> contrato $TERM <span class="hl">0x6BCC…03d8</span>                      │
+│  <span class="ok">[✓]</span> sistema listo. ¿Aprendemos la terminal?<span class="caret">▋</span>       │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+    </pre>
+    <a class="cta" id="play" href="https://blitz.mexi.wtf/webclient/" target="_blank" rel="noopener">▶ Jugar ahora</a>
+    <p class="hint">Sin instalación. Abres en el navegador, creas un usuario, arrancas.</p>
   </div>
 </header>
 
 <!-- Bloque Claude CLI (nuevo hero secundario) -->
 <section id="claude">
   <div class="wrap">
-    <h2>No solo shell. Aprendé Claude CLI.</h2>
-    <p class="lead">Instalá skills. Generá contratos. Deployá a Monad — todo desde la terminal, sin salir de la Academia.</p>
+    <h2>No solo shell. Aprende Claude CLI.</h2>
+    <p class="lead">Instala skills. Genera contratos. Deploya en Monad — todo desde la terminal, sin salir de la Academia.</p>
 
     <pre class="term-block" aria-label="Flujo Claude CLI"><span class="p">$</span> claude skills install <span class="arg">austin-griffith/monad-kit</span>
 <span class="g">→</span> Descargando <span class="arg">austin-griffith/monad-kit</span> ...
@@ -52,28 +63,28 @@ tx:      <span class="c">0xdef…</span></pre>
           <code>austin-griffith/scaffold-eth</code>
           <span class="author">Austin Griffith</span>
         </header>
-        <p>Quickstart para dApps: Hardhat + Next.js + Wagmi preconfigurados.</p>
+        <p>Inicio rápido para dApps: Hardhat + Next.js + Wagmi preconfigurados.</p>
       </article>
       <article class="skill">
         <header>
           <code>austin-griffith/solidity-basics</code>
           <span class="author">Austin Griffith</span>
         </header>
-        <p>Patrones de Solidity: ERC-20, ERC-721, access control, eventos.</p>
+        <p>Patrones de Solidity: ERC-20, ERC-721, control de acceso, eventos.</p>
       </article>
       <article class="skill">
         <header>
           <code>austin-griffith/monad-kit</code>
           <span class="author">Austin Griffith</span>
         </header>
-        <p>Deploy directo a Monad testnet + helpers de faucet + config RPC.</p>
+        <p>Deploy directo a Monad testnet + helpers de faucet + configuración del RPC.</p>
       </article>
       <article class="skill">
         <header>
           <code>anthropic/claude-code-guide</code>
           <span class="author">Anthropic</span>
         </header>
-        <p>Cómo usar Claude Code CLI eficientemente (hooks, slash commands, MCP).</p>
+        <p>Cómo usar Claude Code CLI de forma eficiente (hooks, slash commands, MCP).</p>
       </article>
     </div>
   </div>
@@ -82,21 +93,29 @@ tx:      <span class="c">0xdef…</span></pre>
 <section id="how">
   <div class="wrap">
     <h2>¿Cómo funciona?</h2>
+    <pre class="ascii-flow" aria-hidden="true">
+    ┌──────────┐       ┌─────────────┐      ┌──────────────┐     ┌─────────────┐
+    │  BROWSER │──wss─▶│   /home     │──cd─▶│  claude_dojo │──▶──│ MONAD L1    │
+    │    tú    │       │ (filesystem │      │ (CLI + deps) │     │  $TERM      │
+    └──────────┘       │  as rooms)  │      └──────┬───────┘     └──────▲──────┘
+                       └─────────────┘             │                    │
+                                                   └───── claim ────────┘
+    </pre>
     <ol class="steps">
       <li>
         <span class="step-n">01</span>
         <h3>Shell básico</h3>
-        <p>Entrás al webclient, caés en <code>/home</code>. Aprendés <code>ls</code>, <code>cd</code>, <code>cat</code>, <code>mkdir</code>, <code>grep</code>. El mundo <em>es</em> el filesystem.</p>
+        <p>Entras al webclient, apareces en <code>/home</code>. Aprendes <code>ls</code>, <code>cd</code>, <code>cat</code>, <code>mkdir</code>, <code>grep</code>. El mundo <em>es</em> el filesystem.</p>
       </li>
       <li>
         <span class="step-n">02</span>
         <h3>Shell intermedio</h3>
-        <p><code>echo</code>, <code>head</code>, <code>tail</code>, <code>wc</code>, <code>man</code>, <code>history</code>. Rooms <code>pipe_dojo</code> (<code>|</code>) y <code>redirect_dojo</code> (<code>&gt;</code>, <code>&gt;&gt;</code>) enseñan composición.</p>
+        <p><code>echo</code>, <code>head</code>, <code>tail</code>, <code>wc</code>, <code>man</code>, <code>history</code>. Las salas <code>pipe_dojo</code> (<code>|</code>) y <code>redirect_dojo</code> (<code>&gt;</code>, <code>&gt;&gt;</code>) enseñan composición.</p>
       </li>
       <li>
         <span class="step-n">03</span>
         <h3>Claude CLI + onchain</h3>
-        <p>En <code>claude_dojo</code>: <code>claude skills install</code>, <code>claude new contract</code>, <code>claude deploy</code>. Al terminar, <code>link</code> + <code>claim</code> manda <span class="term">$TERM</span> a tu wallet.</p>
+        <p>En <code>claude_dojo</code>: <code>claude skills install</code>, <code>claude new contract</code>, <code>claude deploy</code>. Al terminar, <code>link</code> + <code>claim</code> envía <span class="term">$TERM</span> a tu wallet.</p>
       </li>
     </ol>
   </div>
@@ -104,7 +123,19 @@ tx:      <span class="c">0xdef…</span></pre>
 
 <section id="quests">
   <div class="wrap">
-    <h2>19 quests <span class="muted">— 540 $TERM si completás todas</span></h2>
+    <h2>19 quests <span class="muted">— 540 $TERM si las completas todas</span></h2>
+    <pre class="ascii-coin" aria-hidden="true">
+            ╔═══════════════╗
+         ╔═╝                 ╚═╗
+        ║    ·───────────·     ║
+        ║   / ╔═══════╗   \    ║
+        ║  |  ║ $TERM ║   |    ║
+        ║   \ ╚═══════╝   /    ║
+        ║    ·───────────·     ║
+         ╚═╗                 ╔═╝
+            ╚═════════════════╝
+               540 · onchain
+    </pre>
     <div class="quest-cols">
       <div class="qcol">
         <h3>Shell básico <span class="muted">(7)</span></h3>
@@ -141,7 +172,7 @@ tx:      <span class="c">0xdef…</span></pre>
         </ul>
       </div>
     </div>
-    <p class="muted small">9 rooms encadenadas: home → ls_dojo → cd_dojo → cat_dojo → mkdir_dojo → pipe_dojo → redirect_dojo → final_exam → claude_dojo.</p>
+    <p class="muted small">9 salas encadenadas: home → ls_dojo → cd_dojo → cat_dojo → mkdir_dojo → pipe_dojo → redirect_dojo → final_exam → claude_dojo.</p>
   </div>
 </section>
 
@@ -150,19 +181,19 @@ tx:      <span class="c">0xdef…</span></pre>
     <h2>Stack</h2>
     <div class="stack-grid">
       <div>
-        <h3>Game</h3>
+        <h3>Juego</h3>
         <ul>
-          <li><strong>Evennia 6.0</strong> — MUD framework Python/Django</li>
-          <li>9 rooms, 19 comandos, 19 quests</li>
-          <li>Webclient HTTP + Telnet raw (port 4100)</li>
+          <li><strong>Evennia 6.0</strong> — framework MUD en Python/Django</li>
+          <li>9 salas, 19 comandos, 19 quests</li>
+          <li>Webclient HTTP + Telnet raw (puerto 4100)</li>
         </ul>
       </div>
       <div>
-        <h3>AI CLI</h3>
+        <h3>CLI de IA</h3>
         <ul>
           <li><strong>Claude CLI</strong> simulado in-game: <code>skills</code>, <code>new contract</code>, <code>deploy</code></li>
           <li>4 skills reales de referencia (Austin Griffith + Anthropic)</li>
-          <li>Template <code>AVAILABLE_SKILLS</code> editable para remixear</li>
+          <li>Plantilla <code>AVAILABLE_SKILLS</code> editable para remixear</li>
         </ul>
       </div>
       <div>
@@ -170,7 +201,7 @@ tx:      <span class="c">0xdef…</span></pre>
         <ul>
           <li><strong>Monad testnet</strong> (chainId <code>10143</code>)</li>
           <li>ERC-20 minimal custom — sin OpenZeppelin</li>
-          <li><strong>web3.py</strong> firma <code>transfer()</code> desde hot wallet</li>
+          <li><strong>web3.py</strong> firma <code>transfer()</code> desde la hot wallet</li>
         </ul>
       </div>
     </div>
@@ -179,18 +210,24 @@ tx:      <span class="c">0xdef…</span></pre>
 
 <footer>
   <div class="wrap">
-    <h2>Onchain receipts</h2>
+    <pre class="ascii-banner" aria-hidden="true">
+╔══════════════════════════════════════════════════════════════╗
+║   B U I L T   F O R   B L I T Z   M T Y   ·   2 0 2 6        ║
+║   P O W E R E D   B Y   M O N A D   ·   C L A U D E          ║
+╚══════════════════════════════════════════════════════════════╝
+    </pre>
+    <h2>Pruebas onchain</h2>
     <dl class="receipts">
       <dt>Contrato $TERM</dt>
       <dd><a href="https://testnet.monadexplorer.com/address/0x6BCC8bA023faD77Fd9c16735fD0DCb030F1b03d8" target="_blank" rel="noopener">0x6BCC…03d8</a></dd>
-      <dt>Tx claim (540 $TERM)</dt>
+      <dt>Tx de claim (540 $TERM)</dt>
       <dd><a href="https://testnet.monadexplorer.com/tx/0x753b572d4cc3265d082d5da4793bb6d8f29bcfeb355d8b49adc463dabddb827b" target="_blank" rel="noopener">0x753b…827b</a></dd>
       <dt>Chain ID</dt>
       <dd>10143</dd>
       <dt>RPC</dt>
       <dd><code>testnet-rpc.monad.xyz</code></dd>
     </dl>
-    <p class="muted small">Hackathon Monad · Powered by <strong>Claude</strong> · <span id="status">status: checking…</span></p>
+    <p class="muted small">Hackathon Monad · Construido con <strong>Claude</strong> · <span id="status">estado: verificando…</span></p>
   </div>
 </footer>
 

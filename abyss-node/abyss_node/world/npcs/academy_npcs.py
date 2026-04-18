@@ -52,6 +52,15 @@ def _get_skills_catalog():
         return {}
 
 
+def _get_deploy_enabling_skills():
+    """Set de slugs que habilitan `claude deploy`. Fallback al skill original."""
+    try:
+        from commands.terminal_commands import DEPLOY_ENABLING_SKILLS
+        return set(DEPLOY_ENABLING_SKILLS)
+    except Exception:
+        return {"austin-griffith/monad-kit"}
+
+
 # ---------------------------------------------------------------------------
 # Base
 # ---------------------------------------------------------------------------
@@ -268,9 +277,10 @@ class ProfShell(AcademyNPC):
         )
 
     def _explain_deploy(self, player):
-        installed = list(player.db.installed_skills or [])
+        installed = set(player.db.installed_skills or [])
         deployed = list(player.db.deployed_contracts or [])
-        has_monad_kit = "austin-griffith/monad-kit" in installed
+        deploy_skills = _get_deploy_enabling_skills()
+        has_deploy_skill = bool(installed & deploy_skills)
 
         # Paso a paso personalizado
         if deployed:
@@ -281,17 +291,18 @@ class ProfShell(AcademyNPC):
                 f"Puedes generar más con `claude new contract Otro`."
             )
             return
-        if not has_monad_kit:
+        if not has_deploy_skill:
             self._say(
-                "Flujo de deploy: 1) `claude skills install austin-griffith/monad-kit` "
-                "(necesario para testnet), 2) `claude new contract MiToken` (genera .sol), "
-                "3) `claude deploy MiToken.sol` (simula broadcast en Monad testnet, te da "
-                "address + tx hash)."
+                "Flujo de deploy: 1) instala un skill con soporte de deploy — "
+                "`claude skills install portdeveloper/monad-development` (oficial, "
+                "auto-verify) o `austin-griffith/monad-kit`. 2) `claude new contract "
+                "MiToken` (genera .sol). 3) `claude deploy MiToken.sol`."
             )
             return
         self._say(
-            "Ya tienes monad-kit. Ahora: 1) `claude new contract MiToken` para generar "
-            "el .sol, 2) `cat MiToken.sol` para revisar, 3) `claude deploy MiToken.sol`."
+            "Ya tienes skill de deploy. Ahora: 1) `claude new contract MiToken` para "
+            "generar el .sol, 2) `cat MiToken.sol` para revisar, "
+            "3) `claude deploy MiToken.sol`."
         )
 
     def _austin_shoutout(self, player):
@@ -339,8 +350,10 @@ class ClaudeAvatar(AcademyNPC):
 
     # --- Responses ----------------------------------------------------
     def _graduation_prompt(self, player):
-        installed = list(player.db.installed_skills or [])
+        installed = set(player.db.installed_skills or [])
         deployed = list(player.db.deployed_contracts or [])
+        deploy_skills = _get_deploy_enabling_skills()
+        has_deploy_skill = bool(installed & deploy_skills)
 
         head = (
             f"Bienvenide a claude_dojo, {player.key}. "
@@ -357,43 +370,47 @@ class ClaudeAvatar(AcademyNPC):
         if not installed:
             self._say(
                 f"{head} Paso 1: instala un skill. Sugerido: "
-                f"`claude skills install austin-griffith/monad-kit`."
+                f"`claude skills install portdeveloper/monad-development` (oficial) "
+                f"o `austin-griffith/monad-kit`."
             )
             return
-        # Instalado pero no deployado
-        has_kit = "austin-griffith/monad-kit" in installed
-        if not has_kit:
+        # Instalado pero sin skill de deploy
+        if not has_deploy_skill:
             self._say(
-                f"{head} Tienes {len(installed)} skill(s) instalado(s), pero para "
-                f"deployar a Monad necesitas `austin-griffith/monad-kit`. Instálalo."
+                f"{head} Tienes {len(installed)} skill(s) pero ninguno habilita deploy. "
+                f"Instala `portdeveloper/monad-development` o `austin-griffith/monad-kit`."
             )
             return
         self._say(
-            f"{head} Tienes monad-kit ready. Ahora: "
+            f"{head} Tienes skill de deploy ready. Ahora: "
             f"`claude new contract MiToken` y luego `claude deploy MiToken.sol`."
         )
 
     def _prompt_skill(self, player):
-        installed = list(player.db.installed_skills or [])
+        installed = set(player.db.installed_skills or [])
+        deploy_skills = _get_deploy_enabling_skills()
+        has_deploy_skill = bool(installed & deploy_skills)
         if not installed:
             self._say(
-                "Instala tu primer skill con `claude skills install austin-griffith/monad-kit`. "
+                "Instala tu primer skill — sugerido `portdeveloper/monad-development` "
+                "(oficial con auto-verify) o `austin-griffith/monad-kit`. "
                 "Ver todos con `claude skills list`."
             )
-        elif "austin-griffith/monad-kit" not in installed:
+        elif not has_deploy_skill:
             self._say(
-                f"Ya tienes {len(installed)} skill(s), pero para deployar a Monad necesitas "
-                f"`austin-griffith/monad-kit`."
+                f"Ya tienes {len(installed)} skill(s), pero para deployar necesitas uno "
+                f"de estos: {', '.join(sorted(deploy_skills))}."
             )
         else:
             self._say(
-                f"Ya tienes monad-kit y {len(installed)-1} skill(s) más. "
+                f"Ya tienes {len(installed)} skill(s), incluido uno con deploy. "
                 f"Sigue con `claude new contract MiToken`."
             )
 
     def _prompt_deploy(self, player):
-        installed = list(player.db.installed_skills or [])
+        installed = set(player.db.installed_skills or [])
         deployed = list(player.db.deployed_contracts or [])
+        deploy_skills = _get_deploy_enabling_skills()
         if deployed:
             last = deployed[-1] if isinstance(deployed[-1], dict) else {}
             addr = last.get("address", "?")
@@ -403,9 +420,10 @@ class ClaudeAvatar(AcademyNPC):
                 f"Puedes generar otro con `claude new contract Otro`."
             )
             return
-        if "austin-griffith/monad-kit" not in installed:
+        if not (installed & deploy_skills):
             self._say(
-                "Para `claude deploy` necesitas instalar `austin-griffith/monad-kit` primero."
+                f"Para `claude deploy` necesitas un skill de deploy. Sugerido: "
+                f"`portdeveloper/monad-development` (oficial) o `austin-griffith/monad-kit`."
             )
             return
         # tiene kit, no ha deployado
