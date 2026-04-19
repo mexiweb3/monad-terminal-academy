@@ -25,7 +25,14 @@ from commands.terminal_commands import (
     CmdLink, CmdQuests, CmdClaim,
 )
 from commands.help_command import CmdHelpCustom
+from commands.onboarding_command import CmdTutorial, CmdBitacora
 from commands.stats_command import CmdStats
+# Sesión D — gameplay: puzzles, combate, collectibles, easter eggs
+from commands.game_commands import (
+    CmdSolve, CmdScan, CmdFight, CmdReconstruct,
+    CmdInventoryMem, CmdLeaderboard,
+    CmdSudo, CmdRm, CmdCancel,
+)
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -87,6 +94,19 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdStats())
         # Onboarding / UX — reemplaza el help default con vista contextual
         self.add(CmdHelpCustom())
+        # Sesión C — Onboarding: tutorial guiado + dashboard de bitácora
+        self.add(CmdTutorial())
+        self.add(CmdBitacora())
+        # Sesión D — Gameplay extendido: puzzles, combate, collectibles
+        self.add(CmdSolve())
+        self.add(CmdScan())
+        self.add(CmdFight())
+        self.add(CmdReconstruct())
+        self.add(CmdInventoryMem())
+        self.add(CmdLeaderboard())
+        self.add(CmdSudo())
+        self.add(CmdRm())
+        self.add(CmdCancel())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

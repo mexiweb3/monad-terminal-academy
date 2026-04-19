@@ -12,33 +12,33 @@ from evennia.utils import logger
 # ---------- Quests ----------
 # Cada quest se completa la primera vez que el jugador usa su comando target.
 QUESTS = [
-    {"id": "q01_ls",      "cmd": "ls",      "reward": 10,  "desc": "Corre `ls` para listar el directorio actual."},
-    {"id": "q02_pwd",     "cmd": "pwd",     "reward": 10,  "desc": "Corre `pwd` para ver en qué directorio estás."},
-    {"id": "q03_cd",      "cmd": "cd",      "reward": 20,  "desc": "Usa `cd <destino>` para moverte entre directorios."},
-    {"id": "q04_cat",     "cmd": "cat",     "reward": 30,  "desc": "Lee un archivo con `cat <archivo>`."},
-    {"id": "q05_mkdir",   "cmd": "mkdir",   "reward": 30,  "desc": "Crea un directorio con `mkdir <nombre>`."},
-    {"id": "q06_touch",   "cmd": "touch",   "reward": 30,  "desc": "Crea un archivo vacío con `touch <nombre>`."},
-    {"id": "q07_grep",    "cmd": "grep",    "reward": 50,  "desc": "Busca texto con `grep <patrón> <archivo>`."},
-    # Nuevos — Sesión A
-    {"id": "q08_echo",    "cmd": "echo",    "reward": 10,  "desc": "Imprime texto con `echo <texto>`."},
-    {"id": "q09_whoami",  "cmd": "whoami",  "reward": 10,  "desc": "Averigua tu usuario con `whoami`."},
-    {"id": "q10_head",    "cmd": "head",    "reward": 20,  "desc": "Lee las primeras líneas con `head <archivo>`."},
-    {"id": "q11_tail",    "cmd": "tail",    "reward": 20,  "desc": "Lee las últimas líneas con `tail <archivo>`."},
-    {"id": "q12_wc",      "cmd": "wc",      "reward": 20,  "desc": "Cuenta líneas/palabras/chars con `wc <archivo>`."},
-    {"id": "q13_man",     "cmd": "man",     "reward": 20,  "desc": "Consulta el manual de un comando con `man <cmd>`."},
-    {"id": "q14_history", "cmd": "history", "reward": 30,  "desc": "Revisa tus últimos comandos con `history`."},
-    # Claude CLI — meta-tool para generar código con IA
-    {"id": "q15_claude",     "cmd": "claude",          "reward": 30,  "desc": "Ejecuta `claude` para abrir el CLI de IA."},
-    {"id": "q16_skill",      "cmd": "claude:skill",    "reward": 40,  "desc": "Instala un skill con `claude skills install <slug>`."},
-    {"id": "q17_newcontract","cmd": "claude:new",      "reward": 50,  "desc": "Genera un contrato con `claude new contract <Nombre>`."},
-    {"id": "q18_deploy",     "cmd": "claude:deploy",   "reward": 60,  "desc": "Deploya el contrato con `claude deploy <archivo.sol>`."},
-    # Install Dojo — aprender a instalar herramientas CLI reales (macOS/Linux/Windows)
-    {"id": "q20_node",            "cmd": "node",              "reward": 10,  "desc": "Verifica Node con `node --version`."},
-    {"id": "q21_install_claude",  "cmd": "install:claude",    "reward": 50,  "desc": "Instala Claude Code (npm, curl o PowerShell — tú eliges)."},
-    {"id": "q22_install_openclaw","cmd": "install:openclaw",  "reward": 50,  "desc": "Instala OpenClaw: `curl -fsSL https://openclaw.ai/install.sh | bash` o `npm i -g openclaw`."},
-    {"id": "q23_install_hermes",  "cmd": "install:hermes",    "reward": 50,  "desc": "Instala Hermes: `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`."},
-    # Onchain
-    {"id": "q19_link",    "cmd": "link",    "reward": 50,  "desc": "Conecta tu wallet con `link 0x...`."},
+    # Acto I — Despertar (rooms: home, ls_dojo, cd_dojo, cat_dojo)
+    {"id": "q01_ls",      "cmd": "ls",      "reward": 10,  "room": "home",     "act": 1, "desc": "Corre `ls` para listar el directorio actual."},
+    {"id": "q02_pwd",     "cmd": "pwd",     "reward": 10,  "room": "cd_dojo",  "act": 1, "desc": "Corre `pwd` para ver en qué directorio estás."},
+    {"id": "q03_cd",      "cmd": "cd",      "reward": 20,  "room": "ls_dojo",  "act": 1, "desc": "Usa `cd <destino>` para moverte entre directorios."},
+    {"id": "q04_cat",     "cmd": "cat",     "reward": 30,  "room": "cat_dojo", "act": 1, "desc": "Lee un archivo con `cat <archivo>`."},
+    # Acto II — Entrenamiento (rooms: mkdir_dojo, pipe_dojo, redirect_dojo, final_exam)
+    {"id": "q05_mkdir",   "cmd": "mkdir",   "reward": 30,  "room": "mkdir_dojo",   "act": 2, "desc": "Crea un directorio con `mkdir <nombre>`."},
+    {"id": "q06_touch",   "cmd": "touch",   "reward": 30,  "room": "mkdir_dojo",   "act": 2, "desc": "Crea un archivo vacío con `touch <nombre>`."},
+    {"id": "q07_grep",    "cmd": "grep",    "reward": 50,  "room": "mkdir_dojo",   "act": 2, "desc": "Busca texto con `grep <patrón> <archivo>`."},
+    {"id": "q08_echo",    "cmd": "echo",    "reward": 10,  "room": "pipe_dojo",    "act": 2, "desc": "Imprime texto con `echo <texto>`."},
+    {"id": "q09_whoami",  "cmd": "whoami",  "reward": 10,  "room": "pipe_dojo",    "act": 2, "desc": "Averigua tu usuario con `whoami`."},
+    {"id": "q10_head",    "cmd": "head",    "reward": 20,  "room": "pipe_dojo",    "act": 2, "desc": "Lee las primeras líneas con `head <archivo>`."},
+    {"id": "q11_tail",    "cmd": "tail",    "reward": 20,  "room": "pipe_dojo",    "act": 2, "desc": "Lee las últimas líneas con `tail <archivo>`."},
+    {"id": "q12_wc",      "cmd": "wc",      "reward": 20,  "room": "pipe_dojo",    "act": 2, "desc": "Cuenta líneas/palabras/chars con `wc <archivo>`."},
+    {"id": "q13_man",     "cmd": "man",     "reward": 20,  "room": "redirect_dojo","act": 2, "desc": "Consulta el manual de un comando con `man <cmd>`."},
+    {"id": "q14_history", "cmd": "history", "reward": 30,  "room": "redirect_dojo","act": 2, "desc": "Revisa tus últimos comandos con `history`."},
+    # Acto III — Ascensión (rooms: install_dojo, claude_dojo)
+    {"id": "q20_node",            "cmd": "node",             "reward": 10, "room": "install_dojo", "act": 3, "desc": "Verifica Node con `node --version`."},
+    {"id": "q21_install_claude",  "cmd": "install:claude",   "reward": 50, "room": "install_dojo", "act": 3, "desc": "Instala Claude Code (npm, curl o PowerShell — tú eliges)."},
+    {"id": "q22_install_openclaw","cmd": "install:openclaw", "reward": 50, "room": "install_dojo", "act": 3, "desc": "Instala OpenClaw: `curl -fsSL https://openclaw.ai/install.sh | bash`."},
+    {"id": "q23_install_hermes",  "cmd": "install:hermes",   "reward": 50, "room": "install_dojo", "act": 3, "desc": "Instala Hermes: `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`."},
+    {"id": "q15_claude",     "cmd": "claude",       "reward": 30, "room": "claude_dojo", "act": 3, "desc": "Ejecuta `claude` para abrir el CLI de IA."},
+    {"id": "q16_skill",      "cmd": "claude:skill", "reward": 40, "room": "claude_dojo", "act": 3, "desc": "Instala un skill con `claude skills install <slug>`."},
+    {"id": "q17_newcontract","cmd": "claude:new",   "reward": 50, "room": "claude_dojo", "act": 3, "desc": "Genera un contrato con `claude new contract <Nombre>`."},
+    {"id": "q18_deploy",     "cmd": "claude:deploy","reward": 60, "room": "claude_dojo", "act": 3, "desc": "Deploya el contrato con `claude deploy <archivo.sol>`."},
+    # Ritual onchain — unlocked desde que entras a claude_dojo
+    {"id": "q19_link",    "cmd": "link",    "reward": 50, "room": "claude_dojo", "act": 3, "desc": "Conecta tu wallet con `link 0x...` o `link tuens.eth`."},
 ]
 QUEST_BY_CMD = {q["cmd"]: q for q in QUESTS}
 
@@ -825,14 +825,75 @@ class CmdQuests(Command):
         _ensure_state(caller)
         _record_history(caller, "quests", "")
         done = set(caller.db.quest_done or [])
-        lines = ["|yTerminal Academy — quests|n"]
+        visited = set(caller.db.visited_rooms or [])
+        # La room actual siempre cuenta como visitada
+        if caller.location:
+            visited.add(caller.location.key)
+        # 'home' siempre desbloqueada (ahí arrancas)
+        visited.add("home")
+
+        # Agrupamos por acto
+        ACT_NAMES = {1: "I · Despertar", 2: "II · Entrenamiento", 3: "III · Ascensión"}
+        by_act = {1: [], 2: [], 3: []}
         for q in QUESTS:
-            mark = "|g✓|n" if q["id"] in done else "|x·|n"
-            lines.append(f"  {mark} |w{q['cmd']:<6}|n  +{q['reward']:>3} $TERM  — {q['desc']}")
-        lines.append("")
+            by_act.setdefault(q.get("act", 1), []).append(q)
+
+        lines = ["|MTerminal Academy — Bitácora de quests|n", ""]
+        hidden = 0
+        visible_any = False
+
+        for act_num in sorted(by_act):
+            act_quests = by_act[act_num]
+            # Solo muestra el acto si alguna quest está desbloqueada/completa
+            any_visible = any(
+                (q["id"] in done) or (q.get("room", "home") in visited)
+                for q in act_quests
+            )
+            if not any_visible:
+                # Acto oculto entero
+                hidden += len(act_quests)
+                continue
+            visible_any = True
+            lines.append(f"  |yActo {ACT_NAMES.get(act_num, act_num)}|n")
+            for q in act_quests:
+                room = q.get("room", "home")
+                if q["id"] in done:
+                    mark = "|g✓|n"
+                elif room in visited:
+                    mark = "|x·|n"
+                else:
+                    hidden += 1
+                    continue
+                cmd_label = q["cmd"]
+                # Etiquetas más legibles para cmds con :
+                if ":" in cmd_label:
+                    cmd_label = cmd_label.replace(":", " ")
+                lines.append(
+                    f"    {mark} |w{cmd_label:<18}|n +{q['reward']:>3} $TERM — {q['desc']}"
+                )
+            lines.append("")
+
+        if hidden:
+            lines.append(
+                f"  |x· {hidden} quest(s) oculta(s) — explora más rooms para descubrirlas.|n"
+            )
+            lines.append("")
+
+        if not visible_any:
+            lines.append("  (sin quests aún — empieza con |wls|n)")
+            lines.append("")
+
+        total = sum(q["reward"] for q in QUESTS)
+        earned = sum(q["reward"] for q in QUESTS if q["id"] in done)
+        lines.append(
+            f"  |yProgreso:|n {len(done)}/{len(QUESTS)} quests · "
+            f"{earned}/{total} $TERM ganados"
+        )
         lines.append(f"  |yPendientes:|n |y{caller.db.abyss_pending} $TERM|n  (usa |wclaim|n)")
         w = caller.db.wallet or "(sin linkear)"
-        lines.append(f"  |yWallet:|n     |c{w}|n")
+        ens = caller.db.wallet_ens or ""
+        wdisplay = f"|c{w}|n" + (f" |y({ens})|n" if ens else "")
+        lines.append(f"  |yWallet:|n     {wdisplay}")
         caller.msg("\n".join(lines))
 
 

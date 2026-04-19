@@ -1,0 +1,93 @@
+/*
+ * Terminal Academy — estilos de narrativa para el webclient
+ *
+ * Regla visual:
+ *   - Texto en MAGENTA (|m, |M) → narrador omnisciente → glow magenta
+ *   - Texto en CYAN  (|c, |C)   → NPC dialogue → tinte cyan suave
+ *   - Texto en AMBER (|y, |Y)   → quest / achievement → glow amber
+ *   - Texto en VERDE (|g, |G)   → output de comandos, prompt → matrix verde
+ *   - Texto en ROJO  (|r, |R)   → error → error-tone
+ *
+ * Evennia genera spans inline-styled para cada color ANSI. No podemos targetear
+ * por nombre de color directo, pero sí por atributo 'style' con selectors CSS4.
+ */
+
+/* Body: monospace universal para la sensación de terminal */
+body, .messagewindow, .main {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Narrador magenta — glow suave, el mundo te habla */
+[style*="color: #ff00ff"],
+[style*="color: #ff55ff"],
+[style*="color: #cc00cc"],
+[style*="color:#ff00ff"],
+[style*="color:#ff55ff"] {
+  text-shadow: 0 0 8px rgba(255, 80, 255, 0.4);
+  letter-spacing: 0.015em;
+}
+
+/* NPC cyan — dialogue, tranquilo */
+[style*="color: #00ffff"],
+[style*="color: #55ffff"],
+[style*="color: #00cccc"],
+[style*="color:#00ffff"],
+[style*="color:#55ffff"] {
+  text-shadow: 0 0 6px rgba(80, 220, 255, 0.35);
+}
+
+/* Amber — quest / achievement / highlights warm */
+[style*="color: #ffff00"],
+[style*="color: #ffff55"],
+[style*="color: #ffd166"],
+[style*="color:#ffff00"] {
+  text-shadow: 0 0 10px rgba(255, 200, 80, 0.45);
+  font-weight: 600;
+}
+
+/* Verde — terminal matrix / prompt, ligero glow */
+[style*="color: #00ff00"],
+[style*="color: #55ff55"],
+[style*="color: #39ff14"],
+[style*="color:#00ff00"],
+[style*="color:#55ff55"] {
+  text-shadow: 0 0 4px rgba(80, 255, 80, 0.25);
+}
+
+/* Rojo — errores, alerta */
+[style*="color: #ff0000"],
+[style*="color: #ff5555"],
+[style*="color:#ff0000"] {
+  text-shadow: 0 0 8px rgba(255, 80, 80, 0.45);
+  font-weight: 600;
+}
+
+/* Echo de comandos (el "$ cmd" que inyecta history.js) — fondo sutil */
+.cmd-echo {
+  background: rgba(57, 255, 20, 0.04);
+  border-left: 2px solid rgba(57, 255, 20, 0.5);
+  padding: 2px 8px;
+  margin: 4px 0 2px;
+  border-radius: 2px;
+}
+
+/* Scrollbars oscuros */
+.main.messagewindow::-webkit-scrollbar {
+  width: 10px;
+}
+.main.messagewindow::-webkit-scrollbar-track {
+  background: #06120a;
+}
+.main.messagewindow::-webkit-scrollbar-thumb {
+  background: rgba(57, 255, 20, 0.3);
+  border-radius: 5px;
+}
+.main.messagewindow::-webkit-scrollbar-thumb:hover {
+  background: rgba(57, 255, 20, 0.5);
+}
+
+/* Selección con color warm */
+::selection {
+  background: rgba(255, 209, 102, 0.4);
+  color: #05110b;
+}

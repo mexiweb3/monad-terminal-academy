@@ -505,9 +505,360 @@ def spawn_claude_avatar(verbose=True):
     )
 
 
+# ---------------------------------------------------------------------------
+# Estado narrativo del jugador (shared helper)
+# ---------------------------------------------------------------------------
+def _quest_state(player) -> str:
+    """
+    Clasifica al jugador en 4 estados según `player.db.quest_done`:
+      "early"  — 0 quests (recién despertó)
+      "mid"    — 1..(total/2 - 1)
+      "late"   — (total/2)..(total - 1)
+      "done"   — todas las quests completadas
+
+    El total se lee perezosamente de commands.terminal_commands.QUESTS.
+    """
+    done = set(player.db.quest_done or [])
+    total = len(_get_quests()) or 1
+    count = len(done)
+    if count == 0:
+        return "early"
+    if count >= total:
+        return "done"
+    if count < total // 2:
+        return "mid"
+    return "late"
+
+
+# ---------------------------------------------------------------------------
+# Eco del Corruptor (final_exam)
+# ---------------------------------------------------------------------------
+ECO_CORRUPTOR_DESC = (
+    "|rEl Eco del Corruptor|n — una silueta inestable que parpadea en la\n"
+    "esquina de la sala como un pixel muerto. No tiene forma fija: a\n"
+    "veces es un perfil, a veces un amasijo de caracteres rotos. Huele\n"
+    "a memoria quemada.\n"
+    "\n"
+    "No te ataca. Sólo habla. Y susurra cosas que no deberías recordar.\n"
+    "Preguntale con |wsay hola corruptor|n — o con |wsay quién eres|n\n"
+    "si estás listo para la respuesta."
+)
+
+
+class EcoCorruptor(AcademyNPC):
+    """
+    NPC en `/final_exam`. Voz misteriosa, antagonista narrativo (no combate).
+
+    Reacciona a:
+      - hola / hello / corruptor          → presentación contextual
+      - quien eres / qué eres / what      → identidad (4 variantes según estado)
+      - miedo / fear                      → discurso del miedo
+      - como te venzo / how defeat        → el único camino es practicar
+      - fragmento / memoria / memory      → burla sobre lo que ya recordaste
+      - adios / bye / chau                → despedida cinemática
+    """
+
+    speaker_label = "|rEco del Corruptor|n"
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.desc = ECO_CORRUPTOR_DESC
+        self.db.npc_type = "antagonist"
+        self.db.faction = "corruptor"
+
+    # --- Routing ------------------------------------------------------
+    def react_to_say(self, player, content):
+        if not self.location or player.location != self.location:
+            return
+        if any(w in content for w in ("hola corruptor", "hola eco", "corruptor", "hello eco")):
+            return self._greet(player)
+        if any(w in content for w in ("quien eres", "quién eres", "que eres", "qué eres", "what are you")):
+            return self._identity(player)
+        if "miedo" in content or "fear" in content:
+            return self._fear(player)
+        if any(w in content for w in ("como te venzo", "cómo te venzo", "how defeat", "como ganar")):
+            return self._how_to_defeat(player)
+        if "fragmento" in content or "memoria" in content or "memory" in content:
+            return self._mock_memories(player)
+        if any(w in content for w in ("adios", "adiós", "bye", "chau", "nos vemos")):
+            return self._farewell(player)
+
+    # --- Responses (4 estados) ---------------------------------------
+    def _greet(self, player):
+        state = _quest_state(player)
+        if state == "early":
+            self._say(
+                "...hueles a neófite. cada tecla que no escribes me alimenta. "
+                "adelante — duda un poco más."
+            )
+        elif state == "mid":
+            self._say(
+                "vaya, aprendes rápido. lástima. cuanto más recuerdas, "
+                "más te das cuenta de lo que perdiste."
+            )
+        elif state == "late":
+            self._say(
+                "casi ahí, intérprete. el último tramo es el más delicado. "
+                "un solo `rm -rf` y vuelves a mí."
+            )
+        else:  # done
+            self._say(
+                "me ganaste esta vuelta. no me destruyes — sólo me demoras. "
+                "la próxima vez que nadie teclee volveré."
+            )
+
+    def _identity(self, player):
+        state = _quest_state(player)
+        variants = {
+            "early": (
+                "soy lo que queda cuando nadie teclea. la entropía del shell. "
+                "el bostezo entre comandos."
+            ),
+            "mid": (
+                "soy tu propia inactividad, amplificada. nací cuando dejaste "
+                "de practicar. cada día que no tocas terminal me engorda."
+            ),
+            "late": (
+                "soy el borrador que no escribiste. el commit que no hiciste. "
+                "me destruyes con `touch`, no con `fight`."
+            ),
+            "done": (
+                "ya lo sabes: soy la ausencia. pero has visto demasiado. "
+                "por hoy me disuelvo."
+            ),
+        }
+        self._say(variants[_quest_state(player)])
+
+    def _fear(self, player):
+        self._say(
+            "el miedo es un pipe sin source. respira y teclea: "
+            "`ls`, `pwd`, `cat README.txt`. se me pasa con tres comandos."
+        )
+
+    def _how_to_defeat(self, player):
+        state = _quest_state(player)
+        if state in ("early", "mid"):
+            self._say(
+                "no con un comando. con una práctica. vuelve mañana y teclea "
+                "otra vez. así se gana."
+            )
+        else:
+            self._say(
+                "ya me estás venciendo. el `claim` final es sólo el cierre "
+                "del ritual — lo importante es que volverás a abrir la terminal."
+            )
+
+    def _mock_memories(self, player):
+        memories = list(player.db.memories or [])
+        total = 10
+        got = len(memories)
+        if got == 0:
+            self._say(
+                "no tienes fragmentos aún. puedo seguir borrando. gracias por "
+                "hacérmelo fácil."
+            )
+        elif got < total:
+            self._say(
+                f"{got}/{total} fragmentos. cada `cat fragmento_XX.mem` es un "
+                f"clavo en mi ataúd. odio los archivos persistentes."
+            )
+        else:
+            self._say(
+                f"{got}/{total}. lo recordaste todo. bien jugado, intérprete."
+            )
+
+    def _farewell(self, player):
+        self._say("...nos vemos cuando dejes de teclear. siempre vuelvo.")
+
+
+# ---------------------------------------------------------------------------
+# La Forjadora (claude_dojo)
+# ---------------------------------------------------------------------------
+LA_FORJADORA_DESC = (
+    "|mLa Forjadora|n — figura andrógina, envuelta en un manto de tokens\n"
+    "flotantes. Sus manos dibujan glyphs Solidity en el aire y los\n"
+    "glyphs se condensan en contratos. Es la guía mística de los\n"
+    "agentes de IA: entre la técnica y el rito, ella prefiere el rito.\n"
+    "\n"
+    "Habla con ella con |wsay hola forjadora|n. Pregunta |wsay qué es\n"
+    "un skill|n, |wsay cómo deploy|n, o |wsay claim|n cuando ya tengas\n"
+    "wallet linkeada."
+)
+
+
+class LaForjadora(AcademyNPC):
+    """
+    NPC en `/claude_dojo`. Guía mística de la IA (variante narrativa del
+    `ClaudeAvatar`, pero con voz propia y diálogo según estado).
+
+    Reacciona a:
+      - hola forjadora / hello forjadora   → bienvenida contextual
+      - skill / skills                     → explica skills disponibles
+      - deploy / deployar                  → guía al deploy
+      - claim / reclamar                   → indica el ritual final
+      - quien eres / qué eres              → identidad
+      - adios / bye                        → despedida
+    """
+
+    speaker_label = "|mLa Forjadora|n"
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.desc = LA_FORJADORA_DESC
+        self.db.npc_type = "instructor"
+        self.db.faction = "academy"
+
+    # --- Routing ------------------------------------------------------
+    def react_to_say(self, player, content):
+        if not self.location or player.location != self.location:
+            return
+        if any(w in content for w in ("hola forjadora", "hello forjadora", "hola forja", "hi forjadora", "hola maestra")):
+            return self._greet(player)
+        if "skill" in content:
+            return self._explain_skill(player)
+        if "deploy" in content or "deployar" in content:
+            return self._explain_deploy(player)
+        if "claim" in content or "reclam" in content:
+            return self._explain_claim(player)
+        if any(w in content for w in ("quien eres", "quién eres", "que eres", "qué eres")):
+            return self._identity(player)
+        if any(w in content for w in ("adios", "adiós", "bye", "chau", "nos vemos")):
+            return self._farewell(player)
+
+    # --- Responses ----------------------------------------------------
+    def _greet(self, player):
+        state = _quest_state(player)
+        if state == "early":
+            self._say(
+                f"Bienvenide al Santuario, {player.key}. Vienes muy "
+                f"adelantade — vuelve cuando hayas aprendido a leer y a "
+                f"crear. Empieza con `cat README.txt` en /home."
+            )
+        elif state == "mid":
+            self._say(
+                f"Te noto más firme, {player.key}. Aún faltan fragmentos, "
+                f"pero ya puedes mirar el catálogo: `claude skills list`."
+            )
+        elif state == "late":
+            self._say(
+                f"Ya casi, intérprete. Instala un skill con "
+                f"`claude skills install portdeveloper/monad-development` "
+                f"o `austin-griffith/monad-kit`, y dime cuando el sol esté forjado."
+            )
+        else:  # done
+            self._say(
+                f"Lo lograste, {player.key}. Tu obra está escrita. "
+                f"Sólo falta firmarla: `link 0xTuWallet` y `claim`. "
+                f"El onchain es eterno."
+            )
+
+    def _explain_skill(self, player):
+        catalog = _get_skills_catalog()
+        if not catalog:
+            self._say(
+                "Un skill es un paquete de conocimiento que la IA carga. "
+                "Prueba `claude skills list` para ver los cuatro linajes disponibles."
+            )
+            return
+        slugs = list(catalog.keys())
+        self._say(
+            "Hay cuatro linajes de skill en este santuario: "
+            + ", ".join(slugs)
+            + ". Instálalos con `claude skills install <slug>`. "
+            "Los de deploy te permiten grabar onchain."
+        )
+
+    def _explain_deploy(self, player):
+        installed = set(player.db.installed_skills or [])
+        deploy_skills = _get_deploy_enabling_skills()
+        has_deploy_skill = bool(installed & deploy_skills)
+        deployed = list(player.db.deployed_contracts or [])
+
+        if deployed:
+            last = deployed[-1] if isinstance(deployed[-1], dict) else {}
+            addr = last.get("address", "?")
+            self._say(
+                f"Ya forjaste un contrato — vive en {addr[:12]}... "
+                f"¿otra obra? `claude new contract OtraCosa`."
+            )
+            return
+        if not has_deploy_skill:
+            self._say(
+                "Para forjar necesitas un skill con deploy. Sugerido: "
+                "`portdeveloper/monad-development` (oficial, auto-verify) "
+                "o `austin-griffith/monad-kit`."
+            )
+            return
+        self._say(
+            "Ya tienes el skill. El ritual: `claude new contract MiToken`, "
+            "luego `cat MiToken.sol` (lee el alma), y `claude deploy MiToken.sol`."
+        )
+
+    def _explain_claim(self, player):
+        wallet = player.db.wallet or ""
+        pending = int(player.db.abyss_pending or 0)
+        if not wallet:
+            self._say(
+                "Primero linkea la wallet: `link 0xTuWallet`. Luego `claim` "
+                "graba $TERM en Monad testnet. Sin wallet no hay firma."
+            )
+        elif pending == 0:
+            self._say(
+                f"Tu wallet {wallet[:6]}...{wallet[-4:]} está linkeada, "
+                f"pero no tienes $TERM pendientes. Completa una quest más."
+            )
+        else:
+            self._say(
+                f"Ready: {pending} $TERM reservados para "
+                f"{wallet[:6]}...{wallet[-4:]}. `claim` y quedas inscrite onchain."
+            )
+
+    def _identity(self, player):
+        self._say(
+            "Soy La Forjadora. Forjo puentes entre lenguaje natural y "
+            "bytecode. Le susurro a Claude y Claude susurra a la EVM."
+        )
+
+    def _farewell(self, player):
+        state = _quest_state(player)
+        if state == "done":
+            self._say(
+                "Vete en paz, intérprete. Tu nombre ya está en la cadena."
+            )
+        else:
+            self._say(
+                "Vuelve cuando tengas más fragmentos. El santuario no se mueve."
+            )
+
+
+# ---------------------------------------------------------------------------
+# Spawners adicionales (idempotentes)
+# ---------------------------------------------------------------------------
+def spawn_eco_corruptor(verbose=True):
+    return _spawn_or_reuse(
+        "world.npcs.academy_npcs.EcoCorruptor",
+        "Eco del Corruptor",
+        "final_exam",
+        ECO_CORRUPTOR_DESC,
+        verbose=verbose,
+    )
+
+
+def spawn_la_forjadora(verbose=True):
+    return _spawn_or_reuse(
+        "world.npcs.academy_npcs.LaForjadora",
+        "La Forjadora",
+        "claude_dojo",
+        LA_FORJADORA_DESC,
+        verbose=verbose,
+    )
+
+
 def spawn_all_academy_npcs(verbose=True):
     """Spawnea/reusa todos los NPCs de la academia. Idempotente."""
     return {
         "prof_shell": spawn_prof_shell(verbose=verbose),
         "claude_avatar": spawn_claude_avatar(verbose=verbose),
+        "eco_corruptor": spawn_eco_corruptor(verbose=verbose),
+        "la_forjadora": spawn_la_forjadora(verbose=verbose),
     }

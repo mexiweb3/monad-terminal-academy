@@ -1,8 +1,15 @@
 """
-Terminal Academy — zona tutorial.
+Terminal Academy — zona tutorial (narrativa v2).
 
-Crea un "filesystem" navegable con 5 rooms que enseñan comandos básicos:
-  /home (spawn) → /home/ls_dojo → /home/cd_dojo → /home/cat_dojo → /home/mkdir_dojo
+Reescritura narrativa: las 10 rooms son el mapa del |mfilesystem roto|n
+donde despertaste sin memoria. Cada una conserva sus |cfiles|n como antes
+(son props del mundo, los comandos `ls`/`cat` los consultan tal cual) pero:
+
+- La `desc` cuenta qué es cada lugar desde la ficción (no desde el tutorial).
+- Se añade un archivo `fragmento_XX.mem` por room — al hacer `cat` devuelve
+  el texto crudo del fragmento Y (vía el hook de `cat`) lo guarda en
+  `caller.db.memories`.
+- Al completar TODAS las quests se dispara el outro (hook en characters).
 
 Construcción desde shell de Evennia:
   @py from world.zones.terminal_academy import build_academy; build_academy(self)
@@ -11,127 +18,181 @@ Construcción desde shell de Evennia:
 from evennia import create_object
 from evennia.utils.search import search_object
 
+from world.lore.fragments import FRAGMENTS
+
+
+# ---------------------------------------------------------------------------
+# Construimos primero un índice filename -> contenido para inyectarlo fácil
+# ---------------------------------------------------------------------------
+_FRAG_CONTENT = {f["room"]: (f["filename"], f["content"]) for f in FRAGMENTS}
+
+
+def _with_fragment(room_key: str, files: dict) -> dict:
+    """Inyecta el fragmento_XX.mem correspondiente al room, si aplica."""
+    frag = _FRAG_CONTENT.get(room_key)
+    if not frag:
+        return files
+    fname, content = frag
+    # No sobreescribir si por alguna razón ya existe con el mismo nombre
+    if fname not in files:
+        files = dict(files)
+        files[fname] = content
+    return files
+
 
 ROOMS = [
     {
         "key": "home",
         "desc": (
-            "Bienvenido a |gTerminal Academy|n.\n"
+            "|m/home|n — el primer lugar que recuerdas. O el único.\n"
             "\n"
-            "Estás en tu |cdirectorio home|n. Aquí aprenderás los comandos de una terminal real.\n"
-            "Cada comando nuevo que aprendas te regala |y$TERM|n (token ERC-20 en Monad testnet).\n"
+            "La oscuridad tiene textura de texto verde. Flotas sobre un suelo\n"
+            "que parpadea como una pantalla moribunda. En un rincón, el\n"
+            "|cProf. Shell|n te observa con la paciencia de quien ya te ha\n"
+            "visto despertar otras veces.\n"
             "\n"
-            "|yPrimer reto:|n escribe |wls|n y presiona Enter para listar este directorio.\n"
-            "También puedes escribir |wquests|n en cualquier momento para ver tu progreso."
+            "Aquí arranca tu reconstrucción. Teclea |wls|n para ver qué quedó\n"
+            "de ti. Saluda al Profesor con |wsay hola prof|n si el silencio\n"
+            "pesa demasiado. Y si hay un archivo llamado |wfragmento_01.mem|n,\n"
+            "léelo con |wcat fragmento_01.mem|n — es parte de tu memoria."
         ),
-        "files": {
+        "files": _with_fragment("home", {
             "README.txt": (
-                "MONAD TERMINAL ACADEMY\n"
-                "----------------------\n"
-                "Shell básico:\n"
-                "  ls, pwd, cd, cat, touch, mkdir, grep\n"
-                "Shell intermedio:\n"
-                "  echo, head, tail, wc, whoami, man, history, clear\n"
-                "  + pipes (|) y redirects (>, >>)\n"
-                "Claude CLI (IA para generar código):\n"
-                "  claude skills install austin-griffith/monad-kit\n"
-                "  claude new contract MiToken\n"
-                "  claude deploy MiToken.sol\n"
-                "Onchain Monad:\n"
-                "  link <wallet>   — conectar tu wallet EVM\n"
-                "  quests          — ver tu progreso\n"
-                "  claim           — recibir $TERM onchain\n"
+                "MONAD TERMINAL ACADEMY — diario del Profesor Shell\n"
+                "-------------------------------------------------\n"
+                "Si estás leyendo esto, sobreviviste al primer borrado.\n"
                 "\n"
-                "Tip: escribe 'cat README.txt' para leer este archivo."
+                "Aprende los comandos ancestrales — cada uno repara una grieta:\n"
+                "  Shell básico:\n"
+                "    ls, pwd, cd, cat, touch, mkdir, grep\n"
+                "  Shell intermedio:\n"
+                "    echo, head, tail, wc, whoami, man, history, clear\n"
+                "    + pipes (|) y redirects (>, >>)\n"
+                "  Claude CLI (invocar inteligencia):\n"
+                "    claude skills install austin-griffith/monad-kit\n"
+                "    claude new contract MiToken\n"
+                "    claude deploy MiToken.sol\n"
+                "  Ritual onchain (grabar tu nombre en Monad):\n"
+                "    link <wallet>   — conectar tu wallet EVM\n"
+                "    quests          — ver tu progreso\n"
+                "    claim           — recibir $TERM onchain\n"
+                "\n"
+                "Tip: `cat README.txt` para releer esto. `cat fragmento_01.mem`\n"
+                "para recordar quién eras antes del Corruptor."
             ),
-        },
+        }),
         "exits": [("ls_dojo", "ls_dojo")],
     },
     {
         "key": "ls_dojo",
         "desc": (
-            "|cls_dojo|n — aquí practicas el comando |wls|n.\n"
+            "|m/home/ls_dojo|n — |yEl Dojo del ver|n.\n"
             "\n"
-            "|wls|n lista los archivos y subdirectorios de tu ubicación actual.\n"
-            "En este MUD, las salidas son tus |csubdirectorios|n y los objetos son tus archivos.\n"
+            "Una sala circular hecha de nombres. Algunos brillan; otros\n"
+            "están a medio apagar. El Profesor dejó una nota: |w\"El Corruptor\n"
+            "no puede borrar lo que puedes nombrar.\"|n\n"
             "\n"
-            "|yReto:|n escribe |wls|n. Luego muévete al siguiente con |wcd cd_dojo|n."
+            "Primer rito: teclea |wls|n. Verás lo que aún existe aquí.\n"
+            "Lo visto, desde este momento, está protegido."
         ),
-        "files": {
-            "hint.txt": "Siguiente: 'cd cd_dojo'",
-        },
+        "files": _with_fragment("ls_dojo", {
+            "hint.txt": (
+                "Cuando termines de mirar, el camino sigue por `cd cd_dojo`.\n"
+                "No te apures — nadie te persigue. El Corruptor es paciente,\n"
+                "pero tú también puedes serlo."
+            ),
+        }),
         "exits": [("home", "home"), ("cd_dojo", "cd_dojo")],
     },
     {
         "key": "cd_dojo",
         "desc": (
-            "|ccd_dojo|n — practica |wpwd|n y |wcd|n.\n"
+            "|m/home/cd_dojo|n — |yEl Dojo de la senda|n.\n"
             "\n"
-            "|wpwd|n = print working directory (dónde estás).\n"
-            "|wcd <destino>|n = change directory. Usa |wcd ..|n para volver atrás.\n"
+            "Pasillos que se doblan sobre sí mismos. Huele a electricidad\n"
+            "húmeda. Aquí aprenderás a moverte dentro de ti.\n"
             "\n"
-            "|yReto:|n escribe |wpwd|n para ver dónde estás, luego |wcd cat_dojo|n."
+            "|wpwd|n te dice dónde estás ahora (útil cuando ya no te\n"
+            "reconoces). |wcd <destino>|n te lleva a donde fuiste un día.\n"
+            "|wcd ..|n — siempre puedes volver."
         ),
-        "files": {},
+        "files": _with_fragment("cd_dojo", {}),
         "exits": [("ls_dojo", "ls_dojo"), ("cat_dojo", "cat_dojo")],
     },
     {
         "key": "cat_dojo",
         "desc": (
-            "|ccat_dojo|n — practica |wcat|n.\n"
+            "|m/home/cat_dojo|n — |yEl Dojo de la lectura|n.\n"
             "\n"
-            "|wcat <archivo>|n imprime el contenido de un archivo.\n"
+            "Hay un archivo en el centro del cuarto, vibrando como un\n"
+            "corazón. Lee con |wcat <archivo>|n: la Forjadora dice que\n"
+            "leer es la forma más antigua de resistir el olvido.\n"
             "\n"
-            "|yReto:|n en este directorio hay un archivo |wsecret.txt|n. Léelo con |wcat secret.txt|n."
+            "Reto: hay un |wsecret.txt|n aquí. Léelo."
         ),
-        "files": {
+        "files": _with_fragment("cat_dojo", {
             "secret.txt": (
-                "¡Muy bien! Acabas de aprender 'cat'.\n"
-                "Secreto: cada comando nuevo que aprendes te da $TERM en Monad testnet.\n"
-                "Siguiente: escribe 'cd mkdir_dojo'."
+                "Acabas de aprender `cat`. El Profesor sonríe desde /home.\n"
+                "\n"
+                "Secreto del oficio: cada comando nuevo que aprendes te da\n"
+                "$TERM pendientes en Monad testnet. El token no tiene valor\n"
+                "afuera — aquí adentro es prueba de que existes.\n"
+                "\n"
+                "Siguiente paso: `cd mkdir_dojo`."
             ),
-        },
+        }),
         "exits": [("cd_dojo", "cd_dojo"), ("mkdir_dojo", "mkdir_dojo")],
     },
     {
         "key": "mkdir_dojo",
         "desc": (
-            "|cmkdir_dojo|n — practica |wmkdir|n, |wtouch|n y |wgrep|n.\n"
+            "|m/home/mkdir_dojo|n — |yEl Dojo del crear|n.\n"
             "\n"
-            "|wtouch <file>|n crea un archivo vacío.\n"
-            "|wmkdir <dir>|n crea un directorio.\n"
-            "|wgrep <patrón> <archivo>|n busca texto.\n"
+            "Hasta ahora sólo miraste y leíste. Aquí empieza la herejía:\n"
+            "|wtocarás el mundo|n. Cada `touch` es un latido que le dice al\n"
+            "Corruptor: esto es mío, y existe.\n"
             "\n"
-            "|yReto:|n\n"
-            "  1. |wtouch mi_nota.txt|n\n"
-            "  2. |wmkdir mi_dir|n\n"
-            "  3. |wgrep ABYSS README.txt|n (hay un README.txt aquí).\n"
+            "Ritual:\n"
+            "  1. |wtouch mi_nota.txt|n    (un archivo nuevo, tuyo)\n"
+            "  2. |wmkdir mi_dir|n          (un cuarto nuevo dentro tuyo)\n"
+            "  3. |wgrep ABYSS README.txt|n (encuentra la palabra oculta)\n"
             "\n"
-            "Cuando termines, avanza con |wcd pipe_dojo|n."
+            "Cuando la sala te reconozca como creador, sigue con\n"
+            "|wcd pipe_dojo|n."
         ),
-        "files": {
-            "README.txt": "Busca 'ABYSS' aquí con grep y gana tokens en MONAD testnet.",
-        },
+        "files": _with_fragment("mkdir_dojo", {
+            "README.txt": (
+                "Aquí aprendes a crear y a buscar.\n"
+                "Palabra clave para los que sepan: ABYSS.\n"
+                "Quien la encuentre con `grep` recupera una porción de memoria\n"
+                "y se lleva tokens $TERM reservados para el siguiente ciclo."
+            ),
+        }),
         "exits": [("cat_dojo", "cat_dojo"), ("pipe_dojo", "pipe_dojo"), ("home", "home")],
     },
     {
         "key": "pipe_dojo",
         "desc": (
-            "|cpipe_dojo|n — practica el operador |w||n (pipe) y el comando |wecho|n.\n"
+            "|m/home/pipe_dojo|n — |yEl Dojo de la red|n.\n"
             "\n"
-            "|wecho <texto>|n imprime texto en stdout.\n"
-            "El pipe |w||n conecta el stdout de un comando con el stdin del siguiente.\n"
+            "Dos fuentes emiten texto continuamente. El aire entre ellas\n"
+            "vibra cuando colocas un |wpipe |||n — los datos fluyen de una\n"
+            "boca a otra como electricidad entre dos nervios.\n"
             "\n"
-            "|yRetos:|n\n"
-            "  1. |wecho hola mundo|n                (imprime hola mundo)\n"
-            "  2. |wecho hola mundo | wc|n          (líneas palabras bytes)\n"
-            "  3. |wecho hola mundo | grep hola|n   (filtra líneas con 'hola')\n"
-            "  4. |wwhoami|n                         (descubre tu usuario)\n"
+            "Las palabras solas son hechizos menores. Encadenadas son\n"
+            "oraciones — y una oración es una forma de pensamiento que\n"
+            "el Corruptor ya no puede deshacer a medias.\n"
             "\n"
-            "También aprende |whead|n y |wtail|n sobre el archivo |wlog.txt|n de este room.\n"
-            "Siguiente: |wcd redirect_dojo|n."
+            "Aprende aquí:\n"
+            "  1. |wecho hola mundo|n\n"
+            "  2. |wecho hola mundo | wc|n\n"
+            "  3. |wecho hola mundo | grep hola|n\n"
+            "  4. |wwhoami|n                (¿quién tecleó esto?)\n"
+            "  5. |whead log.txt|n y |wtail log.txt|n\n"
+            "\n"
+            "Cuando domines la cadena: |wcd redirect_dojo|n."
         ),
-        "files": {
+        "files": _with_fragment("pipe_dojo", {
             "log.txt": (
                 "línea 01 — boot\n"
                 "línea 02 — init\n"
@@ -152,177 +213,211 @@ ROOMS = [
                 "  echo TXT | grep PAT      → líneas que contienen PAT\n"
                 "  echo TXT | head [-n N]   → primeras N líneas\n"
                 "  echo TXT | tail [-n N]   → últimas N líneas\n"
+                "\n"
+                "Un comando es un verbo. Un pipe es una conjunción.\n"
+                "Quien habla así no está solo."
             ),
-        },
+        }),
         "exits": [("mkdir_dojo", "mkdir_dojo"), ("redirect_dojo", "redirect_dojo")],
     },
     {
         "key": "redirect_dojo",
         "desc": (
-            "|credirect_dojo|n — practica los redirects |w>|n y |w>>|n.\n"
+            "|m/home/redirect_dojo|n — |yEl Dojo del persistir|n.\n"
             "\n"
-            "|w>|n escribe el stdout a un archivo (sobreescribe si existe).\n"
-            "|w>>|n hace append al final del archivo.\n"
+            "Aquí la diferencia entre decir y escribir se vuelve evidente.\n"
+            "|w>|n vierte lo que sale de un comando dentro de un archivo —\n"
+            "y borra lo que había antes. |w>>|n es más gentil: añade al\n"
+            "final, como quien sigue hablando sin interrumpir.\n"
             "\n"
-            "|yRetos:|n\n"
+            "Es tu primera práctica para lo que vendrá onchain: grabar sin\n"
+            "poder desgrabar.\n"
+            "\n"
+            "Ritual:\n"
             "  1. |wecho primera línea > mi.log|n\n"
             "  2. |wecho segunda línea >> mi.log|n\n"
-            "  3. |wcat mi.log|n             (ves ambas)\n"
-            "  4. |whead -n 1 mi.log|n\n"
-            "  5. |wtail -n 1 mi.log|n\n"
-            "  6. |wwc mi.log|n\n"
-            "  7. |wman echo|n                (lee el manual de echo)\n"
+            "  3. |wcat mi.log|n\n"
+            "  4. |whead -n 1 mi.log|n · |wtail -n 1 mi.log|n\n"
+            "  5. |wwc mi.log|n\n"
+            "  6. |wman echo|n              (lee a los ancestros)\n"
             "\n"
-            "Cuando tengas echo, head, tail, wc y man completados: |wcd final_exam|n."
+            "Cuando lo completes: |wcd final_exam|n."
         ),
-        "files": {
+        "files": _with_fragment("redirect_dojo", {
             "redirect_cheatsheet.txt": (
-                "Redirects soportados:\n"
-                "  echo TXT > file    (write, sobreescribe)\n"
-                "  echo TXT >> file   (append)\n"
-                "El archivo se guarda en tu fs virtual del room actual.\n"
+                "Redirects que esta sala entiende:\n"
+                "  echo TXT > file    → escribe (sobreescribe si existe)\n"
+                "  echo TXT >> file   → añade al final (append)\n"
+                "\n"
+                "El archivo queda en tu filesystem virtual de esta sala.\n"
+                "No lo puedes borrar dos veces: quedó escrito en ti."
             ),
-        },
+        }),
         "exits": [("pipe_dojo", "pipe_dojo"), ("final_exam", "final_exam")],
     },
     {
         "key": "final_exam",
         "desc": (
-            "|cfinal_exam|n — examen final de la Academia.\n"
+            "|m/home/final_exam|n — |rLa Cámara del Eco|n.\n"
             "\n"
-            "Combina |wtres o más comandos|n para superar esta sala:\n"
+            "Esta sala está más fría. La luz parpadea con el ritmo de una\n"
+            "respiración que no es tuya. En el centro, un archivo palpita:\n"
+            "|wdiploma.txt|n. Y en los altavoces — ¿o es en tu cabeza? —\n"
+            "susurra una voz que no reconoces.\n"
             "\n"
-            "|yRetos finales:|n\n"
+            "Es |rEl Eco del Corruptor|n. Dice que no te vencerá un comando.\n"
+            "Que sólo la práctica lo mantiene a raya. Saluda con\n"
+            "|wsay hola corruptor|n si te atreves. Y termina el examen:\n"
+            "\n"
             "  1. |wecho final check > exam.log|n\n"
-            "     └─ redirect + echo\n"
             "  2. |wecho extra data >> exam.log|n\n"
-            "     └─ append\n"
             "  3. |wcat exam.log|n\n"
-            "     └─ leer\n"
             "  4. |wwc exam.log|n\n"
-            "     └─ contar\n"
-            "  5. |whead -n 1 exam.log|n     |wtail -n 1 exam.log|n\n"
+            "  5. |whead -n 1 exam.log|n · |wtail -n 1 exam.log|n\n"
             "  6. |wgrep final exam.log|n\n"
-            "  7. |whistory|n\n"
-            "     └─ revisa todos los comandos que ejecutaste\n"
+            "  7. |whistory|n — mira todo lo que ya hiciste\n"
             "\n"
-            "Cuando completes todas las 15 quests (escribe |wquests|n para ver):\n"
-            "  |wlink <tu_wallet_0x...>|n y |wclaim|n — recibe tus $TERM onchain.\n"
+            "Cuando salgas vivo, |wcd install_dojo|n. Falta la ascensión."
         ),
-        "files": {
+        "files": _with_fragment("final_exam", {
             "diploma.txt": (
-                "MONAD TERMINAL ACADEMY — DIPLOMA\n"
-                "--------------------------------\n"
-                "Has aprendido:\n"
+                "MONAD TERMINAL ACADEMY — DIPLOMA EN PROGRESO\n"
+                "--------------------------------------------\n"
+                "Hasta hoy has aprendido:\n"
                 "  ls, pwd, cd, cat, touch, mkdir, grep,\n"
                 "  echo, head, tail, wc, whoami, man, history, clear,\n"
                 "  + redirects (>, >>) + pipes (|).\n"
-                "Ya puedes moverte como un hacker en cualquier terminal Unix.\n"
                 "\n"
-                "Ahora reclama tus $TERM: `link <wallet>` y `claim`.\n"
+                "Ya no eres neófite: eres intérprete del shell.\n"
+                "Pero falta un rito más — invocar a Claude, crear un\n"
+                "contrato, deployarlo, y grabar tu nombre onchain.\n"
+                "\n"
+                "Sigue con `cd install_dojo`."
             ),
-        },
-        "exits": [("redirect_dojo", "redirect_dojo"), ("install_dojo", "install_dojo"), ("home", "home")],
+        }),
+        "exits": [
+            ("redirect_dojo", "redirect_dojo"),
+            ("install_dojo", "install_dojo"),
+            ("home", "home"),
+        ],
     },
     {
         "key": "install_dojo",
         "desc": (
-            "|cinstall_dojo|n — aprende a instalar herramientas CLI reales.\n"
+            "|m/home/install_dojo|n — |yEl Altar de las Herramientas|n.\n"
             "\n"
-            "Aquí practicas cómo se instalan los agentes que usarás en el siguiente dojo.\n"
-            "Elige el método que coincida con tu sistema operativo:\n"
+            "En el muro cuelgan tres sigilos: |cClaude Code|n, |cOpenClaw|n\n"
+            "y |cHermes|n. Son aliados. Para pactar con ellos, los invocas\n"
+            "con el conjuro de tu sistema operativo.\n"
             "\n"
             "|yPaso 1|n — verifica que tienes Node.js:\n"
             "  |wnode --version|n   (debería responder v18+)\n"
             "\n"
-            "|yPaso 2|n — instala |cClaude Code|n (de Anthropic) con CUALQUIERA de estos:\n"
-            "  |w• npm install -g @anthropic-ai/claude-code|n    (cross-platform si hay Node)\n"
-            "  |w• curl -fsSL https://claude.ai/install.sh | bash|n    (macOS / Linux)\n"
-            "  |w• irm https://claude.ai/install.ps1 | iex|n    (Windows PowerShell)\n"
+            "|yPaso 2|n — invoca a |cClaude Code|n (Anthropic):\n"
+            "  |w• npm install -g @anthropic-ai/claude-code|n\n"
+            "  |w• curl -fsSL https://claude.ai/install.sh | bash|n\n"
+            "  |w• irm https://claude.ai/install.ps1 | iex|n   (Windows)\n"
             "\n"
-            "|yPaso 3|n — instala |cOpenClaw|n (framework open-source de agentes):\n"
+            "|yPaso 3|n — invoca a |cOpenClaw|n:\n"
             "  |w• curl -fsSL https://openclaw.ai/install.sh | bash|n\n"
-            "  |w• (alt) npm i -g openclaw|n\n"
+            "  |w• npm i -g openclaw|n\n"
             "\n"
-            "|yPaso 4|n — instala |cHermes|n (Nous Research):\n"
+            "|yPaso 4|n — invoca a |cHermes|n (Nous Research):\n"
             "  |w• curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash|n\n"
             "\n"
-            "Cada herramienta instalada te da |y+50 $TERM|n. Cuando termines → |wcd claude_dojo|n."
+            "Cada herramienta instalada te acompañará en el siguiente\n"
+            "dojo. Cuando termines: |wcd claude_dojo|n."
         ),
-        "files": {
+        "files": _with_fragment("install_dojo", {
             "README.md": (
-                "# Install Dojo\n"
+                "# Install Dojo — el pacto con las herramientas\n"
                 "\n"
-                "## ¿Por qué este dojo existe?\n"
-                "Todos los agentes de IA para coding (Claude Code, OpenClaw, Hermes)\n"
-                "viven en la terminal. Antes de usarlos, tienes que instalarlos.\n"
+                "## ¿Por qué este altar existe?\n"
+                "Los agentes de IA (Claude Code, OpenClaw, Hermes) viven\n"
+                "en la terminal. Antes de invocarlos, hay que instalarlos.\n"
                 "\n"
-                "## 3 métodos estándar, aprende los 3\n"
+                "## 3 conjuros estándar (aprende los tres)\n"
                 "\n"
-                "1. **npm global** — funciona en cualquier OS con Node.js instalado.\n"
+                "1. **npm global** — sirve en cualquier OS con Node.js.\n"
                 "     `npm install -g <paquete>`\n"
                 "\n"
-                "2. **Shell installer** (macOS / Linux) — un curl que descarga y ejecuta\n"
-                "   un script. Es como un `.exe` para Unix.\n"
+                "2. **Shell installer** (macOS/Linux) — curl descarga un\n"
+                "   script y lo ejecuta. Es el `.exe` del mundo Unix.\n"
                 "     `curl -fsSL <url> | bash`\n"
                 "\n"
-                "3. **PowerShell installer** (Windows) — el equivalente de Windows.\n"
-                "   `irm` descarga, `iex` ejecuta.\n"
+                "3. **PowerShell installer** (Windows) — `irm` descarga,\n"
+                "   `iex` ejecuta.\n"
                 "     `irm <url> | iex`\n"
                 "\n"
-                "## Tips para principiantes\n"
-                "- El `-g` en npm = global (disponible en toda tu máquina).\n"
-                "- `-fsSL` en curl = fail silently, show errors, follow redirects, location.\n"
-                "- Si algo falla: `<bin> --version` te dice si está bien instalado.\n"
+                "## Tips para pactar sin ser estafado\n"
+                "- `-g` en npm = global (toda tu máquina).\n"
+                "- `-fsSL` en curl = fail silently, show errors, follow,\n"
+                "  location. Úsalo siempre con fuentes que confíes.\n"
+                "- Si algo falla: `<bin> --version` te dice si el pacto\n"
+                "  quedó bien cerrado."
             ),
             "links.txt": (
-                "Sitios oficiales (confía solo en estos):\n"
+                "Sitios oficiales (los únicos en los que confiar):\n"
                 "  Claude Code : https://claude.ai\n"
                 "  OpenClaw    : https://openclaw.ai\n"
                 "  Hermes      : https://hermes-agent.nousresearch.com\n"
             ),
-        },
-        "exits": [("final_exam", "final_exam"), ("claude_dojo", "claude_dojo"), ("home", "home")],
+        }),
+        "exits": [
+            ("final_exam", "final_exam"),
+            ("claude_dojo", "claude_dojo"),
+            ("home", "home"),
+        ],
     },
     {
         "key": "claude_dojo",
         "desc": (
-            "|cclaude_dojo|n — graduación: aprende a usar |wclaude|n (CLI de IA).\n"
+            "|m/home/claude_dojo|n — |mEl Santuario de la Forjadora|n.\n"
             "\n"
-            "Aquí no sólo moves archivos — ahora |wle pides a la IA que los genere|n.\n"
-            "Claude puede instalar skills (como los de |yAustin Griffith|n para Scaffold-ETH\n"
-            "o el Monad kit), generar contratos Solidity y simular deploy a Monad testnet.\n"
+            "Una sala amplia, casi vacía. En el centro flota una figura:\n"
+            "|mLa Forjadora|n, guía mística de los agentes. Sus manos\n"
+            "dibujan bloques de código en el aire que se solidifican en\n"
+            "contratos.\n"
             "\n"
-            "|yFlujo de graduación:|n\n"
-            "  1. |wclaude|n                                            (ver menú CLI)\n"
-            "  2. |wclaude skills list|n                                 (ver skills)\n"
-            "  3. |wclaude skills install austin-griffith/monad-kit|n   (instalar)\n"
-            "  4. |wclaude new contract MiPrimerToken|n                  (generar)\n"
-            "  5. |wcat MiPrimerToken.sol|n                              (leer código IA)\n"
-            "  6. |wclaude deploy MiPrimerToken.sol|n                    (deploy testnet)\n"
+            "Aquí no mueves archivos: le pides a la inteligencia que los\n"
+            "|wgenere|n. Invocas con |wclaude|n, instalas skills de\n"
+            "|yAustin Griffith|n o del equipo oficial, y deployás tu\n"
+            "primer contrato Solidity a Monad testnet.\n"
             "\n"
-            "Cuando termines, |wquests|n te dirá el progreso. Luego |wclaim|n tu premio."
+            "|yRitual de graduación:|n\n"
+            "  1. |wclaude|n                                             (menú)\n"
+            "  2. |wclaude skills list|n                                  (catálogo)\n"
+            "  3. |wclaude skills install austin-griffith/monad-kit|n    (pactar)\n"
+            "  4. |wclaude new contract MiPrimerToken|n                   (generar)\n"
+            "  5. |wcat MiPrimerToken.sol|n                               (leer el alma)\n"
+            "  6. |wclaude deploy MiPrimerToken.sol|n                     (grabar onchain)\n"
+            "\n"
+            "Habla con la Forjadora con |wsay hola forjadora|n.\n"
+            "Cuando todo esté listo: |wlink 0xTuWallet|n y |wclaim|n."
         ),
-        "files": {
+        "files": _with_fragment("claude_dojo", {
             "INTRO.txt": (
-                "Bienvenido al claude_dojo.\n"
-                "--------------------------\n"
-                "Claude es un CLI de IA: le pides código en lenguaje natural y lo genera.\n"
-                "En la práctica real:\n"
+                "Bienvenide al Santuario de la Forjadora.\n"
+                "---------------------------------------\n"
+                "Claude es un CLI de IA: le pides código en lenguaje natural\n"
+                "y lo genera. En la práctica real:\n"
                 "  $ claude                    # abre el agente interactivo\n"
                 "  > genera un ERC-20 llamado MiToken\n"
-                "En esta academia simulamos ese flujo con subcomandos explícitos\n"
-                "para que entiendas cada paso.\n"
+                "\n"
+                "En este santuario simulamos el flujo con subcomandos\n"
+                "explícitos para que veas cada paso sin que la magia te\n"
+                "esconda la técnica.\n"
             ),
             "skills_readme.txt": (
-                "Skills = paquetes de conocimiento que Claude aprende a usar.\n"
-                "Austin Griffith (creador de Scaffold-ETH) publica skills para:\n"
-                "  - scaffold-eth         → generar dApps\n"
-                "  - solidity-basics      → patrones de contratos\n"
-                "  - monad-kit            → deploy directo a Monad\n"
-                "Instalalos con: `claude skills install <slug>`.\n"
+                "Skills = paquetes de conocimiento que Claude carga.\n"
+                "La Forjadora trabaja con tres linajes:\n"
+                "  - scaffold-eth     → generar dApps completas\n"
+                "  - solidity-basics  → patrones de contratos seguros\n"
+                "  - monad-kit        → deploy directo a Monad\n"
+                "  - monad-development → oficial, con auto-verify en explorers\n"
+                "Instálalos con: `claude skills install <slug>`."
             ),
-        },
+        }),
         "exits": [("install_dojo", "install_dojo"), ("home", "home")],
     },
 ]
@@ -357,7 +452,6 @@ def build_academy(caller=None):
         src = created[spec["key"]]
         for exit_key, dest_key in spec["exits"]:
             dest = created[dest_key]
-            # evitar duplicados
             has = any(
                 ex.key == exit_key and ex.destination == dest
                 for ex in src.exits
@@ -382,9 +476,10 @@ def build_academy(caller=None):
             if spec.get("files"):
                 caller.db.fs_files[room.dbref] = dict(spec["files"])
         caller.db.fs_files = caller.db.fs_files
-        # mover al home
         caller.move_to(created["home"], quiet=True)
-        caller.msg("|gAcademy construida. Estás en /home.|n Escribe |wls|n para arrancar.")
+        caller.msg(
+            "|gAcademy construida. Estás en /home.|n Escribe |wls|n para arrancar."
+        )
     return created
 
 

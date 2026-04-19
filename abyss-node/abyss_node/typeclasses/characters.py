@@ -5,11 +5,19 @@ Combat system for The Abyss MUD
 """
 
 import random
+import time
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_object, search_object
 from evennia.utils import delay
 
 from .objects import ObjectParent
+
+
+# Idle watcher — cada N segundos revisa si el jugador está inactivo y hay quests
+# pendientes; si sí, Prof. Shell deja caer una pista sutil.
+IDLE_INTERVAL = 45          # cadencia del ticker en segundos
+IDLE_THRESHOLD = 45         # silencio mínimo antes de disparar un hint
+IDLE_HINT_COOLDOWN = 45     # espaciado mínimo entre hints consecutivos
 
 
 ACADEMY_BANNER = (
@@ -126,8 +134,10 @@ class Character(ObjectParent, DefaultCharacter):
         """
         Se llama cada vez que una Account toma control del personaje.
         La primera vez mostramos el banner + tutorial (idempotente vía
-        db.first_login_done). También celebramos el primer deploy onchain
-        si no fue celebrado todavía (idempotente vía achievements_shown).
+        db.first_login_done) y después el prólogo narrativo del Acto I
+        (idempotente vía db.seen_prologue). También celebramos el primer
+        deploy onchain si no fue celebrado todavía (idempotente vía
+        achievements_shown).
         """
         super().at_post_puppet(**kwargs)
         # NPCs con npc_type ya seteado no deben recibir onboarding.
@@ -137,9 +147,300 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.first_login_done = True
             self.msg(ACADEMY_BANNER)
             self.msg(ACADEMY_TUTORIAL)
+        # Prólogo narrativo v2 — Acto I DESPERTAR. Independiente del banner:
+        # un player puede tener first_login_done=True por un flujo anterior
+        # y aún no haber visto el prólogo narrativo nuevo.
+        self._play_prologue_once()
         # Celebrar el primer deploy una sola vez (independiente del banner
         # — un jugador puede deployar en sesión anterior y re-conectar).
         self._celebrate_first_deploy()
+        # Onboarding (Sesión C) — iniciar idle-watcher y sembrar timestamp
+        # de actividad para que Prof. Shell no hable al instante de loguearse.
+        try:
+            self.db.last_cmd_time = time.time()
+            self._register_idle_watcher()
+        except Exception:
+            # Nunca romper el login por un bug del watcher.
+            pass
+        # Tracking de rooms visitadas (para desbloqueo progresivo de quests)
+        try:
+            self._record_visited_room()
+        except Exception:
+            pass
+
+    def at_after_move(self, source_location, **kwargs):
+        """Hook cuando el character entra a una room. Registra en visited_rooms
+        para desbloquear las quests de ese room gradualmente."""
+        try:
+            super().at_after_move(source_location, **kwargs)
+        except TypeError:
+            super().at_after_move(source_location)
+        if getattr(self.db, "npc_type", None):
+            return
+        try:
+            self._record_visited_room()
+        except Exception:
+            pass
+
+    def _record_visited_room(self):
+        """Añade la room actual a caller.db.visited_rooms (idempotente)."""
+        if not self.location:
+            return
+        key = getattr(self.location, "key", None)
+        if not key:
+            return
+        visited = list(self.db.visited_rooms or [])
+        if key not in visited:
+            visited.append(key)
+            self.db.visited_rooms = visited
+            # Aviso narrativo al primer acceso a cada dojo (excepto home)
+            if key != "home":
+                try:
+                    from utils.narrator import narrate
+                    narrate(
+                        self,
+                        f"Has descubierto un lugar nuevo: |c/{key}|n. "
+                        f"Las quests de esta sala ya aparecen en |wquests|n."
+                    )
+                except Exception:
+                    pass
+
+    def at_post_unpuppet(self, account=None, session=None, **kwargs):
+        """Al desconectarse, apagamos el idle-watcher para liberar recursos."""
+        try:
+            super().at_post_unpuppet(account=account, session=session, **kwargs)
+        except TypeError:
+            # Compat con firmas más antiguas de Evennia.
+            super().at_post_unpuppet()
+        if getattr(self.db, "npc_type", None):
+            return
+        try:
+            self._unregister_idle_watcher()
+        except Exception:
+            pass
+
+    # ------------------------------------------------------------------
+    # Onboarding (Sesión C) — idle-watcher + hints sutiles de Prof. Shell
+    # ------------------------------------------------------------------
+
+    def _register_idle_watcher(self):
+        """Registra un ticker que cada IDLE_INTERVAL llama a `_idle_hint`."""
+        try:
+            from evennia.scripts.tickerhandler import TICKER_HANDLER
+        except Exception:
+            return
+        try:
+            TICKER_HANDLER.add(
+                interval=IDLE_INTERVAL,
+                callback=self._idle_hint,
+                idstring=f"ta_idle_{self.id}",
+                persistent=False,
+            )
+        except Exception:
+            pass
+
+    def _unregister_idle_watcher(self):
+        """Remueve el ticker idle del jugador."""
+        try:
+            from evennia.scripts.tickerhandler import TICKER_HANDLER
+        except Exception:
+            return
+        try:
+            TICKER_HANDLER.remove(
+                interval=IDLE_INTERVAL,
+                callback=self._idle_hint,
+                idstring=f"ta_idle_{self.id}",
+                persistent=False,
+            )
+        except Exception:
+            pass
+
+    def _idle_hint(self):
+        """
+        Si el jugador lleva >IDLE_THRESHOLD segundos sin ejecutar comando,
+        y hay quests pendientes, Prof. Shell le suelta un hint narrativo.
+        Espaciado por IDLE_HINT_COOLDOWN para no ser spam.
+        """
+        if getattr(self.db, "npc_type", None):
+            return
+        if not self.has_account:
+            return
+        loc = self.location
+        if not loc:
+            return
+
+        now = time.time()
+        last_cmd = float(self.db.last_cmd_time or 0.0)
+        last_hint = float(self.db.last_idle_hint or 0.0)
+
+        if last_cmd and (now - last_cmd) < IDLE_THRESHOLD:
+            return
+        if last_hint and (now - last_hint) < IDLE_HINT_COOLDOWN:
+            return
+
+        try:
+            from commands.terminal_commands import QUESTS
+        except Exception:
+            QUESTS = []
+        done = set(self.db.quest_done or [])
+        pending_quests = [q for q in QUESTS if q["id"] not in done]
+
+        try:
+            from utils.narrator import dialogue as _dlg
+        except Exception:
+            def _dlg(caller, npc, text):
+                caller.msg(f"» {npc}: {text}")
+
+        if not pending_quests:
+            # Endgame hints (linkear wallet / claim).
+            wallet = self.db.wallet or ""
+            pending = int(self.db.abyss_pending or 0)
+            if pending > 0 and not wallet:
+                _dlg(
+                    self, "Prof. Shell",
+                    f"Tienes |y{pending} $TERM|n pendientes. Conecta tu wallet "
+                    "con |wlink 0x...|n (o mira |wtutorial wallet|n si dudas).",
+                )
+                self.db.last_idle_hint = now
+            elif pending > 0 and wallet:
+                _dlg(
+                    self, "Prof. Shell",
+                    f"Todo listo: ejecuta |wclaim|n para recibir "
+                    f"|y{pending} $TERM|n.",
+                )
+                self.db.last_idle_hint = now
+            return
+
+        nxt = pending_quests[0]
+        hint_txt = self._pick_idle_hint(nxt["cmd"], (loc.key or "").lower(), nxt)
+        if not hint_txt:
+            return
+        _dlg(self, "Prof. Shell", hint_txt)
+        self.db.last_idle_hint = now
+
+        # Check achievements por si algo cruzó umbral sin notificar.
+        try:
+            from commands.achievements import check_achievements
+            check_achievements(self)
+        except Exception:
+            pass
+
+    def _pick_idle_hint(self, cmd: str, loc_key: str, quest: dict) -> str:
+        """Devuelve el texto del hint según el próximo comando objetivo."""
+        by_cmd = {
+            "ls": "Si no sabes por dónde empezar, escribe |gls|n. Es el primer respiro.",
+            "pwd": "Prueba |wpwd|n — te dice exactamente dónde estás.",
+            "cd": "Mira las salidas con |wls|n y luego |wcd <nombre>|n para moverte.",
+            "cat": "Hay archivos aquí esperando lectura. Prueba |wcat <archivo>|n.",
+            "mkdir": "Crea un subdirectorio con |wmkdir experimentos|n para practicar.",
+            "touch": "Un archivo vacío es potencial. |wtouch notas.txt|n y luego llénalo.",
+            "grep": "Busca un patrón en el archivo del room: |wgrep TOKEN <archivo>|n.",
+            "echo": "|wecho hola mundo|n imprime texto. Con |w> archivo|n lo escribe.",
+            "whoami": "|wwhoami|n — cuando dudes de tu identidad, el sistema responde.",
+            "head": "Lee el principio de un archivo con |whead -n 5 <archivo>|n.",
+            "tail": "Lee el final con |wtail -n 5 <archivo>|n.",
+            "wc": "|wwc <archivo>|n te da líneas, palabras y bytes.",
+            "man": "Consulta el manual: |wman ls|n, |wman grep|n.",
+            "history": "|whistory|n te muestra todo lo que has tecleado.",
+            "claude": "En |cclaude_dojo|n escribe |wclaude|n para abrir el CLI de IA.",
+            "claude:skill": "Instala el kit oficial: |wclaude skills install portdeveloper/monad-development|n.",
+            "claude:new": "Genera un contrato: |wclaude new contract MiToken|n.",
+            "claude:deploy": "Deploya a Monad: |wclaude deploy MiToken.sol|n.",
+            "link": "Si ya tienes wallet, |wlink 0x...|n la conecta. Si no, |wtutorial wallet|n.",
+            "node": "Verifica Node con |wnode --version|n.",
+            "install:claude": "Instala Claude Code: |wcurl -fsSL https://claude.ai/install.sh | bash|n.",
+            "install:openclaw": "Instala OpenClaw: |wcurl -fsSL https://openclaw.ai/install.sh | bash|n.",
+            "install:hermes": "Instala Hermes: |wcurl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash|n.",
+        }
+        txt = by_cmd.get(cmd)
+        if txt:
+            return txt
+        return f"Tu próximo reto: {quest.get('desc', '')}"
+
+    def execute_cmd(self, raw_string, session=None, **kwargs):
+        """
+        Hook corrido en CADA comando tecleado por el jugador. Lo usamos para
+        refrescar `last_cmd_time` — base del idle-watcher.
+        """
+        if not getattr(self.db, "npc_type", None):
+            try:
+                self.db.last_cmd_time = time.time()
+            except Exception:
+                pass
+        return super().execute_cmd(raw_string, session=session, **kwargs)
+
+    def _play_prologue_once(self):
+        """Acto I DESPERTAR, idempotente vía db.seen_prologue."""
+        if self.db.seen_prologue:
+            return
+        try:
+            from world.lore.fragments import PROLOGUE
+            self._play_script(PROLOGUE)
+        except Exception:
+            # Nunca romper el login por un bug narrativo.
+            return
+        self.db.seen_prologue = True
+        try:
+            self.save()
+        except Exception:
+            pass
+
+    def _play_outro_once(self):
+        """Acto III ASCENSIÓN, idempotente vía db.seen_outro.
+
+        Se dispara cuando `quest_done` contiene las N ids de `QUESTS`.
+        Llamar desde `_check_achievements` tras completar una quest.
+        """
+        if self.db.seen_outro:
+            return
+        try:
+            from commands.terminal_commands import QUESTS
+        except Exception:
+            return
+        done = set(self.db.quest_done or [])
+        if len(done) < len(QUESTS):
+            return
+        try:
+            from world.lore.fragments import OUTRO
+            self._play_script(OUTRO)
+        except Exception:
+            return
+        self.db.seen_outro = True
+        try:
+            self.save()
+        except Exception:
+            pass
+
+    def _play_script(self, script):
+        """Interpreta tuplas (kind, *args) contra utils.narrator helpers.
+
+        Kinds soportados:
+          ("scene", title, body)
+          ("narrate", text)
+          ("dialogue", npc_name, text)
+        Cualquier otro kind (o excepción en un helper) se ignora sin romper
+        la secuencia.
+        """
+        try:
+            from utils.narrator import narrate, dialogue, scene
+        except Exception:
+            return
+        for entry in script or []:
+            if not entry:
+                continue
+            kind = entry[0]
+            args = entry[1:]
+            try:
+                if kind == "scene" and args:
+                    title = args[0]
+                    body = args[1] if len(args) > 1 else ""
+                    scene(self, title, body)
+                elif kind == "narrate" and args:
+                    narrate(self, args[0])
+                elif kind == "dialogue" and len(args) >= 2:
+                    dialogue(self, args[0], args[1])
+            except Exception:
+                continue
 
     def _celebrate_first_deploy(self):
         """Idempotente: muestra felicitación por el primer deploy simulado."""
@@ -167,7 +468,8 @@ class Character(ObjectParent, DefaultCharacter):
     def msg(self, text=None, *args, **kwargs):
         """
         Override del msg default para engancharle el check de achievements
-        tras cualquier output. Solo aplica a players (NPCs no acumulan quests).
+        y la |mdetección de fragmentos de memoria|n leídos. Solo aplica a
+        players (NPCs no acumulan quests).
         """
         super().msg(text, *args, **kwargs)
         # Evitamos recursión cuando el propio achievement emite msg.
@@ -175,6 +477,8 @@ class Character(ObjectParent, DefaultCharacter):
             return
         self._in_ach_check = True
         try:
+            # Detectar fragmentos de memoria (cat de fragmento_XX.mem)
+            self._detect_memory_fragment(text)
             self._check_achievements()
         except Exception:
             # Jamás romper el flujo de mensajes por un bug de achievements.
@@ -182,11 +486,71 @@ class Character(ObjectParent, DefaultCharacter):
         finally:
             self._in_ach_check = False
 
+    def _detect_memory_fragment(self, text):
+        """
+        Si el texto mostrado al player corresponde al output de
+        `cat fragmento_XX.mem`, guarda el fragmento en `db.memories`
+        y emite un `achievement()` narrativo. Idempotente: sólo la primera
+        vez que se lee cada fragmento.
+
+        Heurística: el header de cat es `────── fragmento_XX.mem ──────`.
+        """
+        if not text or not isinstance(text, str):
+            return
+        if "fragmento_" not in text or ".mem" not in text:
+            return
+        try:
+            from world.lore.fragments import FRAGMENTS_BY_FILE, collect_fragment
+            from utils.narrator import achievement
+        except Exception:
+            return
+        import re
+        # Busca los nombres "fragmento_XX.mem" en el header/output.
+        candidates = re.findall(r"fragmento_\d{2}\.mem", text)
+        for fname in candidates:
+            if fname not in FRAGMENTS_BY_FILE:
+                continue
+            frag = collect_fragment(self, fname)
+            if not frag:
+                continue
+            # Emite achievement una sola vez (collect_fragment devuelve None
+            # si ya estaba coleccionado).
+            try:
+                total = len(FRAGMENTS_BY_FILE)
+                got = len(self.db.memories or [])
+                body = (
+                    f"{frag['body']}\n"
+                    f"Memoria {got}/{total} recuperada."
+                )
+                achievement(self, frag["title"], body, reward=0)
+            except Exception:
+                pass
+            break  # sólo un fragmento por mensaje
+
     def _check_achievements(self):
-        """Muestra mensajes de achievement al cruzar hitos de quests."""
+        """Muestra mensajes de achievement al cruzar hitos de quests.
+
+        Además dispara el outro (Acto III ASCENSIÓN) al completar TODAS
+        las quests, UNA sola vez, con guard `db.seen_outro`.
+        """
         quest_done = self.db.quest_done
         if not quest_done:
             return
+        # Outro Acto III — sólo dispara si acabamos de completar TODAS las
+        # quests y aún no se mostró. Lo llamamos primero para que el player
+        # vea la escena antes del resto de achievements ya mostrados.
+        try:
+            self._play_outro_once()
+        except Exception:
+            pass
+        # Sesión C — achievements narrativos (Primer respiro, Memoria
+        # despertando, Hacker novato, Maestro del shell, Neo del shell).
+        # Son idempotentes por su propio guard interno.
+        try:
+            from commands.achievements import check_achievements as _narr_ach
+            _narr_ach(self)
+        except Exception:
+            pass
         shown = list(self.db.achievements_shown or [])
         count = len(quest_done)
         new_shown = False
