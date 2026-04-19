@@ -194,10 +194,30 @@ let history = (function () {
         return false;
     };
 
+    // Inyecta el comando tipeado en el output area para que quede en el scrollback
+    // igual que una terminal real: "$ comando" + output debajo.
+    var echoToOutput = function (line) {
+        if (!line) return;
+        try {
+            var $win = $(".main.messagewindow").last();
+            if ($win.length === 0) $win = $("#messagewindow");
+            if ($win.length === 0) $win = $(".stream").last();
+            if ($win.length === 0) return;
+            var escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            var html = '<div class="cmd-echo" style="color:#c8f7c5; font-family: ui-monospace, Menlo, Consolas, monospace;">' +
+                       '<span style="color:#39ff14; font-weight:700;">$</span> ' +
+                       '<span style="color:#ffd166;">' + escaped + '</span>' +
+                       '</div>';
+            $win.append(html);
+            if ($win[0]) $win[0].scrollTop = $win[0].scrollHeight;
+        } catch (e) { /* no-op */ }
+    };
+
     var onSend = function (line) {
         addHist(line);
         pos = 0;
         resetRoomContextOnCD(line);
+        echoToOutput(line);
         return null;
     };
 

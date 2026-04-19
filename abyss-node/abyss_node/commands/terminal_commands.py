@@ -431,12 +431,45 @@ class CmdGREP(Command):
 
 
 # ---------- Wallet / claim onchain ----------
+def _resolve_ens(name: str):
+    """Resuelve un ENS name (.eth, etc.) a una address 0x usando Ethereum mainnet.
+    Retorna (address, None) en éxito, (None, error_str) en fallo.
+    """
+    try:
+        from web3 import Web3
+        from ens import ENS
+    except Exception as e:
+        return None, f"web3/ens no disponible: {e}"
+    rpcs = [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.drpc.org",
+        "https://rpc.flashbots.net",
+        "https://cloudflare-eth.com",
+        "https://rpc.ankr.com/eth",
+        "https://eth.llamarpc.com",
+    ]
+    last_err = None
+    for rpc in rpcs:
+        try:
+            w3 = Web3(Web3.HTTPProvider(rpc, request_kwargs={"timeout": 6}))
+            ns = ENS.from_web3(w3) if hasattr(ENS, "from_web3") else ENS.fromWeb3(w3)
+            addr = ns.address(name)
+            if addr:
+                return str(addr), None
+            last_err = "no encontrado"
+        except Exception as e:
+            last_err = f"{type(e).__name__}: {str(e)[:80]}"
+            continue
+    return None, last_err or "no resuelto"
+
+
 class CmdLink(Command):
     """
-    Conecta tu wallet EVM (0x...) para recibir $TERM en Monad testnet.
+    Conecta tu wallet EVM (0x... o ENS como `vitalik.eth`) para recibir $TERM en Monad testnet.
 
     Usage:
       link <0x...>
+      link <nombre.eth>
     """
     key = "link"
     aliases = ["wallet"]
@@ -450,13 +483,39 @@ class CmdLink(Command):
         _record_history(caller, "link", arg)
         if not arg:
             current = caller.db.wallet or "(sin linkear)"
-            caller.msg(f"wallet actual: |c{current}|n\nusage: link <0x...>")
+            ens = caller.db.wallet_ens or ""
+            display = f"|c{current}|n" + (f" ({ens})" if ens else "")
+            caller.msg(f"wallet actual: {display}\nusage: link <0x...> | link <nombre.eth>")
             return
-        if not (arg.startswith("0x") and len(arg) == 42):
-            caller.msg("|rError:|n formato inválido. Debe ser 0x seguido de 40 hex chars.")
+
+        addr = None
+        ens_display = ""
+
+        # Caso 1: address hex directa
+        if arg.startswith("0x") and len(arg) == 42:
+            addr = arg
+        # Caso 2: parece ENS (tiene punto, no empieza con 0x)
+        elif "." in arg and not arg.startswith("0x"):
+            caller.msg(f"|yResolviendo {arg} via ENS (Ethereum mainnet)...|n")
+            resolved, err = _resolve_ens(arg)
+            if not resolved:
+                caller.msg(f"|rError:|n no pude resolver '{arg}' — {err}")
+                return
+            addr = resolved
+            ens_display = arg
+            caller.msg(f"|gENS resuelto:|n {arg} → |c{addr}|n")
+        else:
+            caller.msg(
+                "|rError:|n formato inválido.\n"
+                "  Usa |w0x...|n (40 hex chars) o un |wnombre.eth|n."
+            )
             return
-        caller.db.wallet = arg
-        caller.msg(f"|gOK|n — wallet linkeada: |c{arg}|n\nAhora usa |wclaim|n para recibir tus $TERM onchain.")
+
+        caller.db.wallet = addr
+        caller.db.wallet_ens = ens_display
+
+        pretty = f"|c{addr}|n" + (f" (|y{ens_display}|n)" if ens_display else "")
+        caller.msg(f"|gOK|n — wallet linkeada: {pretty}\nAhora usa |wclaim|n para recibir tus $TERM onchain.")
         _reward_if_quest(caller, "link")
 
 
