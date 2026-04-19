@@ -1,4 +1,4 @@
-# Monad Terminal Academy
+# Terminal Academy
 
 > De `ls` a `claude deploy` en 15 minutos. Aprende shell + Claude CLI + deploy onchain — todo dentro de un MUD.
 
@@ -39,13 +39,14 @@ Deploy en **Hetzner** (Ubuntu 24.04 / cpx11 / ash) con **nginx + Let's Encrypt**
 ```
 ls, pwd, cd → cat → touch, mkdir, grep
   → echo / head / tail / wc / whoami / man / history + pipes (|) + redirects (>, >>)
-    → claude skills install austin-griffith/monad-kit
-      → claude new contract MiPrimerToken
-        → claude deploy MiPrimerToken.sol
-          → link <wallet> + claim  (tx real en Monad testnet)
+    → node --version → install Claude Code / OpenClaw / Hermes (npm · curl · PowerShell)
+      → claude skills install portdeveloper/monad-development
+        → claude new contract MiPrimerToken
+          → claude deploy MiPrimerToken.sol
+            → link <wallet|ens> + claim  (tx real en Monad testnet)
 ```
 
-**19 quests, 540 `$TERM`, 9 rooms encadenadas**: home → ls_dojo → cd_dojo → cat_dojo → mkdir_dojo → pipe_dojo → redirect_dojo → final_exam → claude_dojo.
+**23 quests, 700 `$TERM`, 10 rooms encadenadas**: home → ls_dojo → cd_dojo → cat_dojo → mkdir_dojo → pipe_dojo → redirect_dojo → final_exam → claude_dojo.
 
 ## Quests
 
@@ -71,14 +72,22 @@ ls, pwd, cd → cat → touch, mkdir, grep
 | `man` | 20 | leer manual |
 | `history` | 30 | comandos previos |
 
+### Install Dojo (4) — instalar herramientas CLI reales
+| Comando | Reward | Qué enseña |
+|---|---:|---|
+| `node --version` | 10 | verificar runtime de Node |
+| `npm install -g @anthropic-ai/claude-code` **o** `curl -fsSL https://claude.ai/install.sh \| bash` **o** `irm https://claude.ai/install.ps1 \| iex` | 50 | instalar Claude Code (cualquier método cuenta) |
+| `curl -fsSL https://openclaw.ai/install.sh \| bash` **o** `npm i -g openclaw` | 50 | instalar **OpenClaw** (framework de agentes) |
+| `curl -fsSL https://hermes-agent.nousresearch.com/install.sh \| bash` | 50 | instalar **Hermes** (Nous Research) |
+
 ### Claude CLI + onchain (5)
 | Comando | Reward | Qué enseña |
 |---|---:|---|
 | `claude` | 30 | abrir el CLI de IA |
-| `claude skills install <slug>` | 40 | instalar skill (Austin Griffith / Anthropic) |
+| `claude skills install <slug>` | 40 | instalar skill (Austin Griffith u oficial de Monad `portdeveloper/monad-development`) |
 | `claude new contract <Nombre>` | 50 | generar Solidity ERC-20 con template |
 | `claude deploy <archivo.sol>` | 60 | deployar a Monad testnet (simulado, determinístico) |
-| `link 0x…` | 50 | conectar tu wallet EVM |
+| `link 0x…` o `link <nombre.eth>` | 50 | conectar tu wallet EVM (soporta ENS) |
 
 ## Skills disponibles (in-game)
 
@@ -86,8 +95,10 @@ ls, pwd, cd → cat → touch, mkdir, grep
 |---|---|---|
 | `austin-griffith/scaffold-eth` | Austin Griffith | Quickstart dApps: Hardhat + Next.js + Wagmi |
 | `austin-griffith/solidity-basics` | Austin Griffith | Patrones de Solidity: ERC-20, ERC-721, access control |
-| `austin-griffith/monad-kit` | Austin Griffith | Deploy directo a Monad testnet + faucet helpers |
+| `portdeveloper/monad-development` | Monad / portdeveloper (**skill oficial del hackathon**) | Foundry + viem + wagmi + faucet helpers + verificación automática (MonadVision/Socialscan/Monadscan) |
 | `anthropic/claude-code-guide` | Anthropic | Cómo usar Claude Code CLI (hooks, slash commands, MCP) |
+
+> El skill de Monad **no es de Austin Griffith** — es un skill independiente publicado por `portdeveloper/skills` (referenciado en el Builder Pack oficial del Blitz MTY).
 
 El catálogo vive en `AVAILABLE_SKILLS` en `abyss-node/abyss_node/commands/terminal_commands.py`. Edítalo para remixear tu propia academia (ver [Para builders](#para-builders--forkea-esto)).
 
@@ -95,7 +106,7 @@ El catálogo vive en `AVAILABLE_SKILLS` en `abyss-node/abyss_node/commands/termi
 
 ### Game
 - **Evennia 6.0** — MUD framework Python/Django/Twisted
-- 9 rooms, 19 comandos, 19 quests, sistema de achievement por milestones
+- 10 rooms, 23 comandos, 23 quests, sistema de achievement por milestones
 - Webclient HTTP + Telnet raw (puerto 4100)
 
 ### AI CLI (simulado in-game)
@@ -186,7 +197,7 @@ Juega via telnet (`telnet localhost 4100`) o webclient (`http://localhost:4101/w
 
 ## Para builders — Forkea esto
 
-Monad Terminal Academy está diseñado como **template** para onboardear dev-newbies a la chain que elijas. El flujo es 100% remixeable:
+Terminal Academy está diseñado como **template** para onboardear dev-newbies a la chain que elijas. El flujo es 100% remixeable:
 
 1. Edita `AVAILABLE_SKILLS` en `abyss-node/abyss_node/commands/terminal_commands.py` con tus propios skills (`owner/slug` + autor + descripción).
 2. Edita `_CONTRACT_TEMPLATE` en el mismo archivo para cambiar qué genera `claude new contract` (ERC-721? vault? voting?).

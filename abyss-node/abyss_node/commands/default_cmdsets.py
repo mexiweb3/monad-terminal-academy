@@ -21,6 +21,7 @@ from commands.terminal_commands import (
     CmdLS, CmdPWD, CmdCD, CmdCAT, CmdTOUCH, CmdMKDIR, CmdGREP,
     CmdEcho, CmdHead, CmdTail, CmdWC, CmdWhoAmI, CmdMan, CmdClear, CmdHistory,
     CmdClaude,
+    CmdNode, CmdNpm, CmdCurl, CmdIrm,
     CmdLink, CmdQuests, CmdClaim,
 )
 from commands.help_command import CmdHelpCustom
@@ -55,7 +56,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDrop())
         self.add(CmdGive())
         self.add(CmdLoot())
-        # Monad Terminal Academy — terminal tutorial + onchain claim
+        # Terminal Academy — terminal tutorial + onchain claim
         self.add(CmdLS())
         self.add(CmdPWD())
         self.add(CmdCD())
@@ -74,6 +75,11 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdHistory())
         # Claude CLI — meta-tool de IA
         self.add(CmdClaude())
+        # Install Dojo — herramientas CLI reales (Claude Code, OpenClaw, Hermes)
+        self.add(CmdNode())
+        self.add(CmdNpm())
+        self.add(CmdCurl())
+        self.add(CmdIrm())
         # Monad onchain
         self.add(CmdLink())
         self.add(CmdQuests())

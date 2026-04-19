@@ -1,5 +1,5 @@
 """
-Monad Terminal Academy — zona tutorial.
+Terminal Academy — zona tutorial.
 
 Crea un "filesystem" navegable con 5 rooms que enseñan comandos básicos:
   /home (spawn) → /home/ls_dojo → /home/cd_dojo → /home/cat_dojo → /home/mkdir_dojo
@@ -16,7 +16,7 @@ ROOMS = [
     {
         "key": "home",
         "desc": (
-            "Bienvenido a |gMonad Terminal Academy|n.\n"
+            "Bienvenido a |gTerminal Academy|n.\n"
             "\n"
             "Estás en tu |cdirectorio home|n. Aquí aprenderás los comandos de una terminal real.\n"
             "Cada comando nuevo que aprendas te regala |y$TERM|n (token ERC-20 en Monad testnet).\n"
@@ -222,7 +222,67 @@ ROOMS = [
                 "Ahora reclama tus $TERM: `link <wallet>` y `claim`.\n"
             ),
         },
-        "exits": [("redirect_dojo", "redirect_dojo"), ("claude_dojo", "claude_dojo"), ("home", "home")],
+        "exits": [("redirect_dojo", "redirect_dojo"), ("install_dojo", "install_dojo"), ("home", "home")],
+    },
+    {
+        "key": "install_dojo",
+        "desc": (
+            "|cinstall_dojo|n — aprende a instalar herramientas CLI reales.\n"
+            "\n"
+            "Aquí practicas cómo se instalan los agentes que usarás en el siguiente dojo.\n"
+            "Elige el método que coincida con tu sistema operativo:\n"
+            "\n"
+            "|yPaso 1|n — verifica que tienes Node.js:\n"
+            "  |wnode --version|n   (debería responder v18+)\n"
+            "\n"
+            "|yPaso 2|n — instala |cClaude Code|n (de Anthropic) con CUALQUIERA de estos:\n"
+            "  |w• npm install -g @anthropic-ai/claude-code|n    (cross-platform si hay Node)\n"
+            "  |w• curl -fsSL https://claude.ai/install.sh | bash|n    (macOS / Linux)\n"
+            "  |w• irm https://claude.ai/install.ps1 | iex|n    (Windows PowerShell)\n"
+            "\n"
+            "|yPaso 3|n — instala |cOpenClaw|n (framework open-source de agentes):\n"
+            "  |w• curl -fsSL https://openclaw.ai/install.sh | bash|n\n"
+            "  |w• (alt) npm i -g openclaw|n\n"
+            "\n"
+            "|yPaso 4|n — instala |cHermes|n (Nous Research):\n"
+            "  |w• curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash|n\n"
+            "\n"
+            "Cada herramienta instalada te da |y+50 $TERM|n. Cuando termines → |wcd claude_dojo|n."
+        ),
+        "files": {
+            "README.md": (
+                "# Install Dojo\n"
+                "\n"
+                "## ¿Por qué este dojo existe?\n"
+                "Todos los agentes de IA para coding (Claude Code, OpenClaw, Hermes)\n"
+                "viven en la terminal. Antes de usarlos, tienes que instalarlos.\n"
+                "\n"
+                "## 3 métodos estándar, aprende los 3\n"
+                "\n"
+                "1. **npm global** — funciona en cualquier OS con Node.js instalado.\n"
+                "     `npm install -g <paquete>`\n"
+                "\n"
+                "2. **Shell installer** (macOS / Linux) — un curl que descarga y ejecuta\n"
+                "   un script. Es como un `.exe` para Unix.\n"
+                "     `curl -fsSL <url> | bash`\n"
+                "\n"
+                "3. **PowerShell installer** (Windows) — el equivalente de Windows.\n"
+                "   `irm` descarga, `iex` ejecuta.\n"
+                "     `irm <url> | iex`\n"
+                "\n"
+                "## Tips para principiantes\n"
+                "- El `-g` en npm = global (disponible en toda tu máquina).\n"
+                "- `-fsSL` en curl = fail silently, show errors, follow redirects, location.\n"
+                "- Si algo falla: `<bin> --version` te dice si está bien instalado.\n"
+            ),
+            "links.txt": (
+                "Sitios oficiales (confía solo en estos):\n"
+                "  Claude Code : https://claude.ai\n"
+                "  OpenClaw    : https://openclaw.ai\n"
+                "  Hermes      : https://hermes-agent.nousresearch.com\n"
+            ),
+        },
+        "exits": [("final_exam", "final_exam"), ("claude_dojo", "claude_dojo"), ("home", "home")],
     },
     {
         "key": "claude_dojo",
@@ -263,14 +323,14 @@ ROOMS = [
                 "Instalalos con: `claude skills install <slug>`.\n"
             ),
         },
-        "exits": [("final_exam", "final_exam"), ("home", "home")],
+        "exits": [("install_dojo", "install_dojo"), ("home", "home")],
     },
 ]
 
 
 def build_academy(caller=None):
     """
-    Crea (o rehace) la zona Monad Terminal Academy.
+    Crea (o rehace) la zona Terminal Academy.
     Llamar desde @py: from world.zones.terminal_academy import build_academy; build_academy(self)
     """
     from typeclasses.rooms import Room

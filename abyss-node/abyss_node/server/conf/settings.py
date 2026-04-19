@@ -32,7 +32,7 @@ from evennia.settings_default import *
 ######################################################################
 
 # This is the name of your game. Make it catchy!
-SERVERNAME = "Monad Terminal Academy"
+SERVERNAME = "Terminal Academy"
 
 # Puertos alternos (4000-4005 estaban ocupados en este host)
 TELNET_PORTS = [4100]

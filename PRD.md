@@ -1,4 +1,4 @@
-# Monad Terminal Academy — PRD
+# Terminal Academy — PRD
 
 > Hackathon Monad. MUD educativo que enseña terminal a principiantes y paga `$TERM` ERC-20 en Monad testnet al completar quests. Base: `abyss-node` (Evennia).
 

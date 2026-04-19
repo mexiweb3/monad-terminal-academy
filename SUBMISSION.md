@@ -1,20 +1,20 @@
-# Monad Terminal Academy — Submission Blitz MTY 2026
+# Terminal Academy — Submission Blitz MTY 2026
 
 > Copy-paste-ready para el formulario de entrega (17:00 – 17:30 CST).
 
 ## Project Title
-**Monad Terminal Academy**
+**Terminal Academy**
 
 ## Description (1 línea)
 Aprende a usar la terminal jugando — gana `$TERM` ERC-20 en Monad testnet por cada comando que dominas.
 
 ## Description (1 párrafo)
-Monad Terminal Academy es un MUD educativo onchain: un mundo de texto modelado como un filesystem real donde las salas son directorios y los items son archivos. Los jugadores aprenden 19 comandos REALES de shell (`ls`, `cd`, `cat`, `grep`, pipes `|`, redirects `>` / `>>`, `head`, `tail`) con **comportamiento de terminal real** (prompt dinámico, `↑↓` history, `Tab` autocomplete, `cd -`, `mkdir` que crea directorios navegables) — más un comando `claude` que simula pair-programar con IA para generar y deployar contratos. Al completar quests conectan su wallet con `link 0x...` y corren `claim` para recibir sus `$TERM` onchain. Deployado en producción en Hetzner con HTTPS vía Let's Encrypt.
+Terminal Academy es un MUD educativo onchain: un mundo de texto modelado como un filesystem real donde las salas son directorios y los items son archivos. Los jugadores aprenden 23 comandos REALES de shell + install de CLI tools (`ls`, `cd`, `cat`, `grep`, pipes `|`, redirects `>` / `>>`, `head`, `tail`) con **comportamiento de terminal real** (prompt dinámico, `↑↓` history, `Tab` autocomplete, `cd -`, `mkdir` que crea directorios navegables) — más un comando `claude` que simula pair-programar con IA para generar y deployar contratos. Al completar quests conectan su wallet con `link 0x...` y corren `claim` para recibir sus `$TERM` onchain. Deployado en producción en Hetzner con HTTPS vía Let's Encrypt.
 
 ## Tweet (copia, publica, y pega el URL del tweet)
 
 ```
-🖥️ Monad Terminal Academy — de `ls` a deployar un ERC-20 en 15 min.
+🖥️ Terminal Academy — de `ls` a deployar un ERC-20 en 15 min.
 
 MUD educativo onchain:
 • 19 comandos reales de shell (con prompt, ↑↓, Tab)

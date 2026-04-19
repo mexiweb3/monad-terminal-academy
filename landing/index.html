@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Monad Terminal Academy — shell + Claude CLI + deploy onchain</title>
+<title>Terminal Academy — shell + Claude CLI + deploy onchain</title>
 <meta name="description" content="MUD educativo onchain. Aprendes terminal y Claude CLI, deployas tu primer contrato en Monad y cobras $TERM al completar quests.">
-<meta property="og:title" content="Monad Terminal Academy">
+<meta property="og:title" content="Terminal Academy">
 <meta property="og:description" content="En 15 min pasas de `ls` a deployar un ERC-20 en Monad. Y cobras $TERM onchain.">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="style.css">
@@ -15,13 +15,13 @@
 <header class="crt">
   <div class="wrap">
     <pre class="logo" aria-hidden="true">
- __  __                       _   _____                    _             _
-|  \/  | ___  _ __   __ _  __| | |_   _|__ _ __ _ __ ___ (_)_ __   __ _| |
-| |\/| |/ _ \| '_ \ / _` |/ _` |   | |/ _ \ '__| '_ ` _ \| | '_ \ / _` | |
-| |  | | (_) | | | | (_| | (_| |   | |  __/ |  | | | | | | | | | | (_| | |
-|_|  |_|\___/|_| |_|\__,_|\__,_|   |_|\___|_|  |_| |_| |_|_|_| |_|\__,_|_|
+ _____                    _             _
+|_   _|__ _ __ _ __ ___ (_)_ __   __ _| |
+  | |/ _ \ '__| '_ ` _ \| | '_ \ / _` | |
+  | |  __/ |  | | | | | | | | | | (_| | |
+  |_|\___|_|  |_| |_| |_|_|_| |_|\__,_|_|
 
-                              A C A D E M Y
+                A C A D E M Y
     </pre>
     <p class="tag">De <code class="inline">ls</code> a <code class="inline">claude deploy</code> en 15 minutos.</p>
     <p class="sub">MUD educativo onchain. Aprendes terminal, instalas skills de Claude CLI, generas un contrato y lo deployas en <strong>Monad testnet</strong>. Cobras <span class="term">$TERM</span> al completar cada quest.</p>
@@ -47,8 +47,8 @@
     <h2>No solo shell. Aprende Claude CLI.</h2>
     <p class="lead">Instala skills. Genera contratos. Deploya en Monad — todo desde la terminal, sin salir de la Academia.</p>
 
-    <pre class="term-block" aria-label="Flujo Claude CLI"><span class="p">$</span> claude skills install <span class="arg">austin-griffith/monad-kit</span>
-<span class="g">→</span> Descargando <span class="arg">austin-griffith/monad-kit</span> ...
+    <pre class="term-block" aria-label="Flujo Claude CLI"><span class="p">$</span> claude skills install <span class="arg">portdeveloper/monad-development</span>
+<span class="g">→</span> Descargando <span class="arg">portdeveloper/monad-development</span> ...
 <span class="g">✓</span> Skill instalado.
 <span class="p">$</span> claude new contract <span class="arg">MiPrimerToken</span>
 <span class="g">✓</span> Escrito <span class="y">54 líneas</span> en <span class="arg">MiPrimerToken.sol</span>.
@@ -74,10 +74,10 @@ tx:      <span class="c">0xdef…</span></pre>
       </article>
       <article class="skill">
         <header>
-          <code>austin-griffith/monad-kit</code>
-          <span class="author">Austin Griffith</span>
+          <code>portdeveloper/monad-development</code>
+          <span class="author">skill oficial · Monad Blitz MTY</span>
         </header>
-        <p>Deploy directo a Monad testnet + helpers de faucet + configuración del RPC.</p>
+        <p>Foundry + viem + wagmi + faucet helpers + verificación auto (MonadVision / Socialscan / Monadscan). Deploy directo a Monad testnet. <strong>No es de Austin Griffith</strong> — skill independiente del Builder Pack oficial.</p>
       </article>
       <article class="skill">
         <header>
@@ -123,7 +123,7 @@ tx:      <span class="c">0xdef…</span></pre>
 
 <section id="quests">
   <div class="wrap">
-    <h2>19 quests <span class="muted">— 540 $TERM si las completas todas</span></h2>
+    <h2>23 quests <span class="muted">— 700 $TERM si las completas todas</span></h2>
     <pre class="ascii-coin" aria-hidden="true">
             ╔═══════════════╗
          ╔═╝                 ╚═╗
@@ -184,7 +184,7 @@ tx:      <span class="c">0xdef…</span></pre>
         <h3>Juego</h3>
         <ul>
           <li><strong>Evennia 6.0</strong> — framework MUD en Python/Django</li>
-          <li>9 salas, 19 comandos, 19 quests</li>
+          <li>9 salas, 19 comandos, 23 quests</li>
           <li>Webclient HTTP + Telnet raw (puerto 4100)</li>
         </ul>
       </div>

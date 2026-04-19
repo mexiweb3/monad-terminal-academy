@@ -1,5 +1,5 @@
 """
-Monad Terminal Academy — comandos estilo terminal + quests + wallet/claim onchain.
+Terminal Academy — comandos estilo terminal + quests + wallet/claim onchain.
 
 El jugador aprende comandos reales de shell ejecutándolos dentro del MUD.
 Cada comando usado por primera vez completa una quest y suma $TERM pendientes.
@@ -32,6 +32,11 @@ QUESTS = [
     {"id": "q16_skill",      "cmd": "claude:skill",    "reward": 40,  "desc": "Instala un skill con `claude skills install <slug>`."},
     {"id": "q17_newcontract","cmd": "claude:new",      "reward": 50,  "desc": "Genera un contrato con `claude new contract <Nombre>`."},
     {"id": "q18_deploy",     "cmd": "claude:deploy",   "reward": 60,  "desc": "Deploya el contrato con `claude deploy <archivo.sol>`."},
+    # Install Dojo — aprender a instalar herramientas CLI reales (macOS/Linux/Windows)
+    {"id": "q20_node",            "cmd": "node",              "reward": 10,  "desc": "Verifica Node con `node --version`."},
+    {"id": "q21_install_claude",  "cmd": "install:claude",    "reward": 50,  "desc": "Instala Claude Code (npm, curl o PowerShell — tú eliges)."},
+    {"id": "q22_install_openclaw","cmd": "install:openclaw",  "reward": 50,  "desc": "Instala OpenClaw: `curl -fsSL https://openclaw.ai/install.sh | bash` o `npm i -g openclaw`."},
+    {"id": "q23_install_hermes",  "cmd": "install:hermes",    "reward": 50,  "desc": "Instala Hermes: `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`."},
     # Onchain
     {"id": "q19_link",    "cmd": "link",    "reward": 50,  "desc": "Conecta tu wallet con `link 0x...`."},
 ]
@@ -431,6 +436,290 @@ class CmdGREP(Command):
 
 
 # ---------- Wallet / claim onchain ----------
+# ---------- Install Dojo: node + npm simulados ----------
+class CmdNode(Command):
+    """
+    Node.js runtime (simulado — muestra versión instalada en la Academia).
+
+    Usage:
+      node --version
+      node -v
+    """
+    key = "node"
+    locks = "cmd:all()"
+    help_category = "Install"
+
+    def func(self):
+        caller = self.caller
+        _ensure_state(caller)
+        arg = (self.args or "").strip()
+        _record_history(caller, "node", arg)
+        if arg in ("--version", "-v", ""):
+            caller.msg("|gv22.22.2|n")
+            _reward_if_quest(caller, "node")
+            return
+        caller.msg(
+            "node: REPL interactivo no soportado en la Academia.\n"
+            "Usa |wnode --version|n para verificar la instalación."
+        )
+
+
+# Catálogo de packages que el `npm install -g` reconoce en este mundo.
+NPM_PACKAGES = {
+    "@anthropic-ai/claude-code": {
+        "quest": "install:claude",
+        "bin": "claude",
+        "version": "1.2.0",
+        "desc": "Claude Code — CLI oficial de Anthropic para pair-programar con IA",
+    },
+    "openclaw": {
+        "quest": "install:openclaw",
+        "bin": "openclaw",
+        "version": "0.8.3",
+        "desc": "OpenClaw — framework open-source de agentes (openclaw.ai)",
+    },
+}
+
+
+# URLs reconocidas por curl/irm para simular install scripts
+INSTALL_SCRIPTS = {
+    "claude.ai/install.sh": {
+        "quest": "install:claude",
+        "bin": "claude",
+        "version": "1.2.0",
+        "source": "Anthropic · claude.ai",
+        "shell": "bash",
+    },
+    "claude.ai/install.ps1": {
+        "quest": "install:claude",
+        "bin": "claude",
+        "version": "1.2.0",
+        "source": "Anthropic · claude.ai (Windows PowerShell)",
+        "shell": "powershell",
+    },
+    "openclaw.ai/install.sh": {
+        "quest": "install:openclaw",
+        "bin": "openclaw",
+        "version": "0.8.3",
+        "source": "OpenClaw · openclaw.ai",
+        "shell": "bash",
+    },
+    "hermes-agent.nousresearch.com/install.sh": {
+        "quest": "install:hermes",
+        "bin": "hermes",
+        "version": "0.5.2",
+        "source": "Nous Research · hermes-agent.nousresearch.com",
+        "shell": "bash",
+    },
+}
+
+
+def _simulate_install(caller, cfg, install_cmd: str, platform_label: str):
+    """Imprime output realista de un install script + aplica reward de quest."""
+    bin_name = cfg["bin"]
+    caller.msg(
+        f"|x{platform_label} detected. Fetching installer...|n\n"
+        f"|x  → {install_cmd}|n\n"
+        f"\n"
+        f"  [|g✓|n] descargando de {cfg['source']}\n"
+        f"  [|g✓|n] verificando checksum\n"
+        f"  [|g✓|n] instalando binario {bin_name}\n"
+        f"  [|g✓|n] agregando al PATH\n"
+        f"\n"
+        f"|g╭─ Instalado ─────────────────────────╮|n\n"
+        f"|g│|n  |c{bin_name}|n |wv{cfg['version']}|n\n"
+        f"|g│|n  {cfg['source']}\n"
+        f"|g╰─────────────────────────────────────╯|n\n"
+        f"\n"
+        f"Verifica con |w{bin_name} --version|n"
+    )
+    _reward_if_quest(caller, cfg["quest"])
+
+
+def _match_install_url(raw_args: str):
+    """Dado los args de curl/irm, detecta qué install script se está ejecutando."""
+    low = (raw_args or "").lower()
+    for path, cfg in INSTALL_SCRIPTS.items():
+        if path.lower() in low:
+            return path, cfg
+    return None, None
+
+
+class CmdNpm(Command):
+    """
+    Gestor de paquetes de Node (simulado — solo soporta `install -g` de un set curado).
+
+    Usage:
+      npm --version
+      npm install -g <package>
+
+    Paquetes soportados en la Academia:
+      @anthropic-ai/claude-code · opencode-ai · hermes-cli
+    """
+    key = "npm"
+    locks = "cmd:all()"
+    help_category = "Install"
+
+    def func(self):
+        caller = self.caller
+        _ensure_state(caller)
+        raw = (self.args or "").strip()
+        _record_history(caller, "npm", raw)
+        parts = raw.split()
+
+        if not parts or parts[0] in ("--version", "-v"):
+            caller.msg("|g10.9.2|n")
+            return
+
+        if parts[0] == "help" or parts[0] == "-h":
+            caller.msg(self.__doc__)
+            return
+
+        if parts[0] != "install" and parts[0] != "i":
+            caller.msg(f"npm: subcomando '{parts[0]}' no soportado en la Academia.")
+            return
+
+        # Parsear flags y package name
+        flags = [p for p in parts[1:] if p.startswith("-")]
+        args_rest = [p for p in parts[1:] if not p.startswith("-")]
+        if "-g" not in flags and "--global" not in flags:
+            caller.msg(
+                "npm: en la Academia solo soportamos |winstall global|n.\n"
+                "Usa: |wnpm install -g <package>|n"
+            )
+            return
+        if not args_rest:
+            caller.msg("usage: npm install -g <package>")
+            return
+
+        pkg_name = args_rest[0]
+        pkg = NPM_PACKAGES.get(pkg_name)
+        if not pkg:
+            known = ", ".join(NPM_PACKAGES.keys())
+            caller.msg(
+                f"npm ERR! 404 Not Found: '|y{pkg_name}|n'\n"
+                f"La Academia reconoce: |w{known}|n"
+            )
+            return
+
+        # Simular output realista de npm
+        bin_name = pkg["bin"]
+        caller.msg(
+            f"|xadded 1 package, and audited 1 package in 3s|n\n"
+            f"\n"
+            f"|gfound 0 vulnerabilities|n\n"
+            f"\n"
+            f"|g╭─ Instalado ─────────────────────────╮|n\n"
+            f"|g│|n  |c{pkg_name}@{pkg['version']}|n\n"
+            f"|g│|n  {pkg['desc']}\n"
+            f"|g│|n  bin: |w/usr/local/bin/{bin_name}|n\n"
+            f"|g╰─────────────────────────────────────╯|n\n"
+            f"\n"
+            f"Verifica con |w{bin_name} --version|n"
+        )
+        _reward_if_quest(caller, pkg["quest"])
+
+
+class CmdCurl(Command):
+    """
+    Simula `curl` para ejecutar install scripts del Install Dojo.
+
+    Uso típico:
+      curl -fsSL <url> | bash
+      curl -fsSL https://claude.ai/install.sh | bash
+      curl -fsSL https://openclaw.ai/install.sh | bash
+      curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+    """
+    key = "curl"
+    locks = "cmd:all()"
+    help_category = "Install"
+
+    def func(self):
+        caller = self.caller
+        _ensure_state(caller)
+        raw = (self.args or "").strip()
+        _record_history(caller, "curl", raw)
+
+        if not raw:
+            caller.msg("curl: usage: curl <url> [| bash]")
+            return
+
+        # Detectar si el pipeline es un install script conocido
+        path, cfg = _match_install_url(raw)
+        low = raw.lower()
+        pipes_to_shell = any(s in low for s in ("| bash", "| sh", "| zsh"))
+
+        if path and pipes_to_shell:
+            install_cmd = f"curl {raw}"
+            _simulate_install(caller, cfg, install_cmd, "macOS/Linux")
+            return
+
+        if path and not pipes_to_shell:
+            caller.msg(
+                f"Descargando {path}...\n"
+                f"(recibí {cfg.get('bytes', 1240)} bytes)\n"
+                f"Tip: para ejecutar el script, pípealo a bash: |wcurl ...{path} | bash|n"
+            )
+            return
+
+        caller.msg(
+            "curl: en la Academia solo simulamos los install scripts del Install Dojo.\n"
+            "Prueba uno de estos:\n"
+            "  |wcurl -fsSL https://claude.ai/install.sh | bash|n\n"
+            "  |wcurl -fsSL https://openclaw.ai/install.sh | bash|n\n"
+            "  |wcurl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash|n"
+        )
+
+
+class CmdIrm(Command):
+    """
+    PowerShell `Invoke-RestMethod` (alias `irm`) — simulado para Windows install.
+
+    Uso típico:
+      irm <url> | iex
+      irm https://claude.ai/install.ps1 | iex
+    """
+    key = "irm"
+    aliases = ["Invoke-RestMethod", "iwr", "Invoke-WebRequest"]
+    locks = "cmd:all()"
+    help_category = "Install"
+
+    def func(self):
+        caller = self.caller
+        _ensure_state(caller)
+        raw = (self.args or "").strip()
+        _record_history(caller, "irm", raw)
+
+        if not raw:
+            caller.msg(
+                "irm (Invoke-RestMethod) — PowerShell / Windows.\n"
+                "Usage: |wirm <url> | iex|n\n"
+                "Ej: |wirm https://claude.ai/install.ps1 | iex|n"
+            )
+            return
+
+        path, cfg = _match_install_url(raw)
+        low = raw.lower()
+        pipes_to_iex = any(s in low for s in ("| iex", "| invoke-expression"))
+
+        if path and pipes_to_iex:
+            install_cmd = f"irm {raw}"
+            _simulate_install(caller, cfg, install_cmd, "Windows PowerShell")
+            return
+
+        if path:
+            caller.msg(
+                f"Descargado {path}.\n"
+                f"Tip: pípealo a iex para ejecutar: |wirm ...{path} | iex|n"
+            )
+            return
+
+        caller.msg(
+            "irm: en la Academia solo simulamos install scripts del Install Dojo (Windows).\n"
+            "Prueba: |wirm https://claude.ai/install.ps1 | iex|n"
+        )
+
+
 def _resolve_ens(name: str):
     """Resuelve un ENS name (.eth, etc.) a una address 0x usando Ethereum mainnet.
     Retorna (address, None) en éxito, (None, error_str) en fallo.
@@ -536,7 +825,7 @@ class CmdQuests(Command):
         _ensure_state(caller)
         _record_history(caller, "quests", "")
         done = set(caller.db.quest_done or [])
-        lines = ["|yMonad Terminal Academy — quests|n"]
+        lines = ["|yTerminal Academy — quests|n"]
         for q in QUESTS:
             mark = "|g✓|n" if q["id"] in done else "|x·|n"
             lines.append(f"  {mark} |w{q['cmd']:<6}|n  +{q['reward']:>3} $TERM  — {q['desc']}")
@@ -1002,7 +1291,7 @@ MAN_PAGES = {
         "    claude deploy <archivo.sol>          (simula deploy Monad testnet)\n\n"
         "DESCRIPTION\n"
         "    Meta-tool que simula el CLI real de Claude Code. El flujo pedagógico:\n"
-        "      1) `claude skills install austin-griffith/monad-kit`\n"
+        "      1) `claude skills install portdeveloper/monad-development`\n"
         "      2) `claude new contract MiToken`\n"
         "      3) `claude deploy MiToken.sol`\n"
         "    Cada paso completa una quest y acumula $TERM."
@@ -1104,11 +1393,6 @@ AVAILABLE_SKILLS = {
         "author": "Austin Griffith",
         "desc": "Patrones de Solidity: ERC-20, ERC-721, access control, eventos.",
     },
-    "austin-griffith/monad-kit": {
-        "name": "Monad testnet kit",
-        "author": "Austin Griffith",
-        "desc": "Deploy directo a Monad testnet + helpers de faucet + config RPC.",
-    },
     "portdeveloper/monad-development": {
         "name": "Monad development (oficial)",
         "author": "portdeveloper",
@@ -1126,8 +1410,9 @@ AVAILABLE_SKILLS = {
 }
 
 # Skills que desbloquean `claude deploy` en Monad testnet.
+# NOTA: el skill oficial de Monad es portdeveloper/monad-development (no es de Austin Griffith;
+# Austin publica otros skills para Solidity/Scaffold-ETH, pero el de Monad es independiente).
 DEPLOY_ENABLING_SKILLS = frozenset({
-    "austin-griffith/monad-kit",
     "portdeveloper/monad-development",
 })
 
@@ -1136,7 +1421,7 @@ _CONTRACT_TEMPLATE = """// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
 /// @title {name}
-/// @notice Contrato generado por Claude en Monad Terminal Academy.
+/// @notice Contrato generado por Claude en Terminal Academy.
 /// @dev ERC-20 mínimo — sin dependencias externas.
 contract {name} {{
     string public constant name = "{name}";
@@ -1199,7 +1484,7 @@ class CmdClaude(Command):
       claude deploy <archivo.sol>          (simula deploy en Monad testnet)
 
     Ejemplo del flujo completo que enseña la Academia:
-      1) claude skills install austin-griffith/monad-kit
+      1) claude skills install portdeveloper/monad-development
       2) claude new contract MiToken
       3) claude deploy MiToken.sol
     """
@@ -1377,10 +1662,10 @@ class CmdClaude(Command):
         installed = set(caller.db.installed_skills or [])
         if not (installed & DEPLOY_ENABLING_SKILLS):
             caller.msg(
-                "|yclaude:|n para deployar en Monad necesitas un skill con soporte de deploy.\n"
-                "Instala uno: |wclaude skills install austin-griffith/monad-kit|n\n"
-                "           o: |wclaude skills install portdeveloper/monad-development|n "
-                "(oficial — incluye verificación auto en MonadVision/Socialscan/Monadscan)"
+                "|yclaude:|n para deployar en Monad necesitas el skill oficial.\n"
+                "Instálalo: |wclaude skills install portdeveloper/monad-development|n\n"
+                "(incluye verificación auto en MonadVision / Socialscan / Monadscan, "
+                "Foundry + viem + wagmi, faucet via agents.devnads.com)"
             )
             return
 

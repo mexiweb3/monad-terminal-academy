@@ -1,4 +1,4 @@
-# Monad Terminal Academy — Pitch de 3 minutos
+# Terminal Academy — Pitch de 3 minutos
 
 > Estructura del pitch oficial (Notion Blitz MTY): **Problema · Solución · Revenue · Monad · Validación**. ≤ 3 min, ≤ 1 idea por bullet.
 
@@ -8,7 +8,7 @@
 
 > "¿Cuántos de ustedes le han tenido miedo a una terminal? Yo también.
 > La primera vez que abrí bash, cerré la laptop. Hoy construimos una solución onchain para que ningún principiante vuelva a sentir eso.
-> Los invito a **Monad Terminal Academy**."
+> Los invito a **Terminal Academy**."
 
 *(mientras hablas, abres [https://blitz.mexi.wtf/webclient/](https://blitz.mexi.wtf/webclient/) en pantalla completa)*
 
@@ -23,12 +23,12 @@
 
 ## 2️⃣ Solución (45 s)
 
-**Monad Terminal Academy** es un **MUD onchain** (mundo de texto) modelado como un filesystem real:
+**Terminal Academy** es un **MUD onchain** (mundo de texto) modelado como un filesystem real:
 
 - Las **salas = directorios** (9 rooms encadenadas: `/home` → `ls_dojo` → `cd_dojo` → `cat_dojo` → `mkdir_dojo` → `pipe_dojo` → `redirect_dojo` → `final_exam` → **`claude_dojo`**).
 - Los **items = archivos** (`README.txt`, `log.txt`, `secret.txt`, cheatsheets).
-- **19 comandos REALES** de terminal con comportamiento de shell real: **prompt dinámico** (`tunombre@academy:/academy/ls_dojo$`), **`↑↓` history**, **`Tab` autocomplete**, `cd -` para OLDPWD, `mkdir` que crea directorios navegables. Y un comando **`claude`** que enseña a pair-programar con IA desde la terminal.
-- Cada comando aprendido completa una **quest** → acumula `$TERM`. 19 quests, **540 `$TERM`** al completar todo.
+- **23 comandos REALES** de terminal con comportamiento de shell real: **prompt dinámico** (`tunombre@academy:/academy/ls_dojo$`), **`↑↓` history**, **`Tab` autocomplete**, `cd -` para OLDPWD, `mkdir` que crea directorios navegables. Y un comando **`claude`** que enseña a pair-programar con IA desde la terminal.
+- Cada comando aprendido completa una **quest** → acumula `$TERM`. 23 quests, **700 `$TERM`** al completar todo.
 - Cuando el jugador linkea su wallet con `link 0x...` y corre `claim`, recibe sus `$TERM` **onchain en Monad testnet**.
 
 *(demo live — 45 s: create account → ls → cat README → cd → grep → link → claim → mostrar tx en explorer)*
@@ -60,7 +60,7 @@ Ticket promedio: $5 USD/alumno/mes en B2C, $20k USD/deploy en B2B.
 ## 🎤 Cierre (10 s)
 
 > "Si creen que web3 necesita onboarding mejor, esta es nuestra apuesta.
-> **Monad Terminal Academy. Aprendes terminal, te llevas tokens reales.**
+> **Terminal Academy. Aprendes terminal, te llevas tokens reales.**
 > Play ahora: `blitz.mexi.wtf` · Repo: `github.com/mexiweb3/monad-terminal-academy` · Gracias."
 
 ---
