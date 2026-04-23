@@ -10,10 +10,14 @@ from django.urls import path
 
 from evennia.web.website.urls import urlpatterns as evennia_website_urlpatterns
 
+from web.website.views.healthcheck import health as health_view
+
 # add patterns here
 urlpatterns = [
-    # path("url-pattern", imported_python_view),
-    # path("url-pattern", imported_python_view),
+    # /health — JSON status endpoint (nginx / uptime monitors).
+    # Responde 200 si DB OK, 503 si DB caída. Ver views/healthcheck.py.
+    path("health", health_view, name="health"),
+    path("health/", health_view),
 ]
 
 # read by Django

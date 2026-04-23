@@ -1,0 +1,74 @@
+# ============================================================================
+# Terminal Academy — Evennia systemd unit
+# ============================================================================
+#
+# Qué hace:
+#   Levanta el server de Evennia (Portal + Server) como servicio supervisado
+#   por systemd. Garantiza que:
+#     * El juego arranca automáticamente en boot del VPS.
+#     * Si el proceso crashea, systemd lo reinicia (Restart=on-failure).
+#     * Los logs (stdout/stderr) van a journald → se ven con `journalctl -u
+#       terminal-academy -f` sin necesidad de tail sobre server/logs/*.log.
+#
+# Evennia usa double-fork para desacoplar Portal y Server, por lo que el
+# Type=forking es el correcto: systemd espera a que el padre retorne y
+# trackea los PIDs hijos vía cgroup.
+#
+# Instalación (ver deploy/RUNBOOK_HARDENING.md):
+#   scp deploy/systemd/terminal-academy.service \
+#       root@178.156.198.144:/etc/systemd/system/
+#   ssh root@178.156.198.144 "systemctl daemon-reload && \
+#     systemctl enable terminal-academy && \
+#     systemctl start terminal-academy && \
+#     systemctl status terminal-academy"
+#
+# Para aplicar cambios a código (hot reload sin downtime):
+#   systemctl reload terminal-academy
+# Para restart duro (Portal + Server):
+#   systemctl restart terminal-academy
+#
+# ============================================================================
+
+[Unit]
+Description=Terminal Academy (Evennia MUD)
+Documentation=https://www.evennia.com/docs/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+
+# Evennia espera que el CWD sea el game dir (donde vive server/conf/settings.py)
+WorkingDirectory=/root/monadmty/abyss-node/abyss_node
+
+# PATH con el venv al frente para que `evennia` resuelva su python correcto
+Environment=PATH=/root/monadmty/.venv/bin:/usr/bin:/bin
+Environment=PYTHONUNBUFFERED=1
+
+User=root
+Group=root
+
+ExecStart=/root/monadmty/.venv/bin/evennia start
+ExecStop=/root/monadmty/.venv/bin/evennia stop
+ExecReload=/root/monadmty/.venv/bin/evennia reload
+
+# Si el proceso muere (crash, OOM, etc.) reiniciar con backoff de 10 s.
+# "on-failure" no reinicia si el admin hace stop manual (evita loops).
+Restart=on-failure
+RestartSec=10
+
+# Arranque puede tardar: Evennia hace migrations + load de typeclasses.
+TimeoutStartSec=120
+TimeoutStopSec=60
+
+# Logging a journald (captura stdout/stderr de Portal + Server).
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=terminal-academy
+
+# Hardening mínimo — no bloquea bind a <1024 porque Evennia usa 4100+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

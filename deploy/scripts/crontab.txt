@@ -1,0 +1,26 @@
+# ============================================================================
+# Terminal Academy — crontab entries
+# ============================================================================
+#
+# Instalación en VPS (como root):
+#   1) ssh root@178.156.198.144
+#   2) crontab -e
+#   3) Pegar el contenido de abajo (las líneas que NO empiezan con #)
+#   4) Guardar + salir (:wq en vim, Ctrl-X Y en nano)
+#   5) Verificar:    crontab -l
+#   6) Forzar un run manual para probar:
+#        /root/monadmty/deploy/scripts/backup_db.sh
+#        tail /root/monadmty/backups/backup.log
+#
+# Ver logs de ejecuciones cron:
+#   journalctl -u cron -f
+#   grep CRON /var/log/syslog
+#
+# ============================================================================
+
+# ---- PEGAR DESDE AQUÍ ----
+
+# Terminal Academy — backup diario de evennia.db3 a las 03:00 UTC
+0 3 * * * /root/monadmty/deploy/scripts/backup_db.sh >/dev/null 2>&1
+
+# ---- HASTA AQUÍ ----
