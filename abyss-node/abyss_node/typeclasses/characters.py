@@ -361,6 +361,7 @@ class Character(ObjectParent, DefaultCharacter):
             "claude:skill": "Instala el kit oficial: |wclaude skills install portdeveloper/monad-development|n.",
             "claude:new": "Genera un contrato: |wclaude new contract MiToken|n.",
             "claude:deploy": "Deploya a Monad: |wclaude deploy MiToken.sol|n.",
+            "verify:claude": "Deployá con Claude REAL y vuelve: |wverify claude <tx-hash>|n.",
             "link": "Si ya tienes wallet, |wlink 0x...|n la conecta. Si no, |wtutorial wallet|n.",
             "node": "Verifica Node con |wnode --version|n.",
             "install:claude": "Instala Claude Code: |wcurl -fsSL https://claude.ai/install.sh | bash|n.",

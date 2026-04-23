@@ -36,7 +36,7 @@ QUESTS = [
     {"id": "q15_claude",     "cmd": "claude",       "reward": 30, "room": "claude_dojo", "act": 3, "desc": "Ejecuta `claude` para abrir el CLI de IA."},
     {"id": "q16_skill",      "cmd": "claude:skill", "reward": 40, "room": "claude_dojo", "act": 3, "desc": "Instala un skill con `claude skills install <slug>`."},
     {"id": "q17_newcontract","cmd": "claude:new",   "reward": 50, "room": "claude_dojo", "act": 3, "desc": "Genera un contrato con `claude new contract <Nombre>`."},
-    {"id": "q18_deploy",     "cmd": "claude:deploy","reward": 60, "room": "claude_dojo", "act": 3, "desc": "Deploya el contrato con `claude deploy <archivo.sol>`."},
+    {"id": "q18_deploy",     "cmd": "verify:claude","reward": 60, "room": "claude_dojo", "act": 3, "desc": "Deployá un ERC-20 a Monad testnet con Claude REAL y pegá el tx con `verify claude <tx>`."},
     # Ritual onchain — unlocked desde que entras a claude_dojo
     {"id": "q19_link",    "cmd": "link",    "reward": 50, "room": "claude_dojo", "act": 3, "desc": "Conecta tu wallet con `link 0x...` o `link tuens.eth`."},
 ]
@@ -514,24 +514,30 @@ INSTALL_SCRIPTS = {
 }
 
 
-def _simulate_install(caller, cfg, install_cmd: str, platform_label: str):
-    """Imprime output realista de un install script + aplica reward de quest."""
+def _install_real_banner(caller, cfg: dict, install_cmd: str, platform_label: str):
+    """Reconoce que el alumno tecleó el comando correcto y lo empuja a
+    ejecutarlo en SU terminal real.
+
+    NO simula una instalación. El reward de la quest de install se
+    mantiene (es el pago por *aprender cuál es el comando correcto*),
+    pero el mensaje deja clarísimo que dentro del MUD no se instala nada.
+    """
     bin_name = cfg["bin"]
     caller.msg(
-        f"|x{platform_label} detected. Fetching installer...|n\n"
-        f"|x  → {install_cmd}|n\n"
+        f"|y╭─ {platform_label} — comando reconocido ─────────╮|n\n"
+        f"|y│|n  |c{bin_name}|n — {cfg['source']}\n"
+        f"|y│|n\n"
+        f"|y│|n  |wEste MUD NO instala binarios|n. Copiá este comando a\n"
+        f"|y│|n  |wtu terminal REAL|n (bash / PowerShell) y ejecutalo ahí:\n"
+        f"|y│|n\n"
+        f"|y│|n    |c$|n {install_cmd}\n"
+        f"|y│|n\n"
+        f"|y│|n  Cuando {bin_name} responda en tu shell, verificá con:\n"
+        f"|y│|n    |c$|n {bin_name} --version\n"
+        f"|y╰──────────────────────────────────────────────────╯|n\n"
         f"\n"
-        f"  [|g✓|n] descargando de {cfg['source']}\n"
-        f"  [|g✓|n] verificando checksum\n"
-        f"  [|g✓|n] instalando binario {bin_name}\n"
-        f"  [|g✓|n] agregando al PATH\n"
-        f"\n"
-        f"|g╭─ Instalado ─────────────────────────╮|n\n"
-        f"|g│|n  |c{bin_name}|n |wv{cfg['version']}|n\n"
-        f"|g│|n  {cfg['source']}\n"
-        f"|g╰─────────────────────────────────────╯|n\n"
-        f"\n"
-        f"Verifica con |w{bin_name} --version|n"
+        f"(dev: la quest se completa trust-based al tipear el comando "
+        f"correcto aquí; no verificamos binarios en la máquina del alumno.)"
     )
     _reward_if_quest(caller, cfg["quest"])
 
@@ -602,22 +608,8 @@ class CmdNpm(Command):
             )
             return
 
-        # Simular output realista de npm
-        bin_name = pkg["bin"]
-        caller.msg(
-            f"|xadded 1 package, and audited 1 package in 3s|n\n"
-            f"\n"
-            f"|gfound 0 vulnerabilities|n\n"
-            f"\n"
-            f"|g╭─ Instalado ─────────────────────────╮|n\n"
-            f"|g│|n  |c{pkg_name}@{pkg['version']}|n\n"
-            f"|g│|n  {pkg['desc']}\n"
-            f"|g│|n  bin: |w/usr/local/bin/{bin_name}|n\n"
-            f"|g╰─────────────────────────────────────╯|n\n"
-            f"\n"
-            f"Verifica con |w{bin_name} --version|n"
-        )
-        _reward_if_quest(caller, pkg["quest"])
+        install_cmd = f"npm install -g {pkg_name}"
+        _install_real_banner(caller, pkg, install_cmd, "npm (global)")
 
 
 class CmdCurl(Command):
@@ -651,7 +643,7 @@ class CmdCurl(Command):
 
         if path and pipes_to_shell:
             install_cmd = f"curl {raw}"
-            _simulate_install(caller, cfg, install_cmd, "macOS/Linux")
+            _install_real_banner(caller, cfg, install_cmd, "macOS/Linux (bash)")
             return
 
         if path and not pipes_to_shell:
@@ -704,7 +696,7 @@ class CmdIrm(Command):
 
         if path and pipes_to_iex:
             install_cmd = f"irm {raw}"
-            _simulate_install(caller, cfg, install_cmd, "Windows PowerShell")
+            _install_real_banner(caller, cfg, install_cmd, "Windows PowerShell")
             return
 
         if path:
@@ -1532,22 +1524,21 @@ contract {name} {{
 
 class CmdClaude(Command):
     """
-    Claude CLI — el meta-tool de IA para generar código, instalar skills y deployar.
+    Portal de salida al Claude Code real. Este comando YA NO simula nada
+    dentro del MUD — te muestra el flujo de 4 pasos y te dice cuándo
+    volver a `verify claude <tx>` con el hash del deploy real.
 
     Usage:
-      claude                               (info y flujo)
-      claude skills                        (lista skills disponibles)
-      claude skills list
-      claude skills installed              (lo que tienes instalado)
-      claude skills install <owner/slug>   (descarga e instala un skill)
-      claude new contract <Nombre>         (genera <Nombre>.sol en tu fs)
-      claude new token <SYMBOL>            (genera token.sol)
-      claude deploy <archivo.sol>          (simula deploy en Monad testnet)
+      claude                               (flujo de 4 pasos — léelo)
+      claude skills [install <slug>]       (recordatorio: se corre en tu terminal)
+      claude new contract <Nombre>         (recordatorio: se corre en tu terminal)
+      claude deploy <archivo.sol>          (recordatorio + te manda a `verify`)
 
-    Ejemplo del flujo completo que enseña la Academia:
-      1) claude skills install portdeveloper/monad-development
-      2) claude new contract MiToken
-      3) claude deploy MiToken.sol
+    Flujo real que enseña la Academia:
+      1) En TU terminal (no aquí): `npm install -g @anthropic-ai/claude-code`
+      2) En TU terminal: `claude` — chateá con la IA
+      3) En TU terminal: `claude` "genera un ERC-20 y deployalo a Monad testnet"
+      4) Copiá el tx hash que te devuelve y vuelve aquí: `verify claude <tx>`
     """
     key = "claude"
     locks = "cmd:all()"
@@ -1555,25 +1546,39 @@ class CmdClaude(Command):
 
     # --- helpers -----------------------------------------------------------
     def _ensure_claude_state(self, caller):
-        if caller.db.installed_skills is None:
-            caller.db.installed_skills = []
         if caller.db.deployed_contracts is None:
             caller.db.deployed_contracts = []
 
     def _banner(self, caller):
         caller.msg(
-            "\n|c╭─ Claude CLI ─────────────────────────────────────────╮|n\n"
-            "|c│|n  IA que genera, debuggea y deploya código desde la terminal.\n"
-            "|c│|n  Modelo activo: |wclaude-opus-4-7|n · cwd: |w{cwd}|n\n"
+            "\n|c╭─ Claude CLI — portal de salida ──────────────────────╮|n\n"
+            "|c│|n  Claude Code es un CLI |wREAL|n de Anthropic. Este MUD te\n"
+            "|c│|n  prepara para usarlo en tu terminal — y verifica lo que\n"
+            "|c│|n  hagas de vuelta onchain.\n"
             "|c│|n\n"
-            "|c│|n  Subcomandos:\n"
-            "|c│|n    |wclaude skills list|n                     — ver skills\n"
-            "|c│|n    |wclaude skills install <owner/slug>|n     — instalar\n"
-            "|c│|n    |wclaude new contract <Nombre>|n           — Solidity stub\n"
-            "|c│|n    |wclaude deploy <file.sol>|n               — Monad testnet\n"
-            "|c╰──────────────────────────────────────────────────────╯|n".format(
-                cwd=f"/academy/{caller.location.key}" if caller.location else "/",
-            )
+            "|c│|n  |yFlujo de graduación (4 pasos):|n\n"
+            "|c│|n\n"
+            "|c│|n  |w1)|n |cInstalá Claude Code|n en tu shell real:\n"
+            "|c│|n       |c$|n npm install -g @anthropic-ai/claude-code\n"
+            "|c│|n     (o ver |winstall_dojo|n para opciones curl / PowerShell)\n"
+            "|c│|n\n"
+            "|c│|n  |w2)|n |cInvocá claude|n en tu terminal:\n"
+            "|c│|n       |c$|n claude\n"
+            "|c│|n     Se abre un REPL con la IA. Probala un poco.\n"
+            "|c│|n\n"
+            "|c│|n  |w3)|n |cGenerá + deployá un ERC-20 a Monad testnet|n:\n"
+            "|c│|n       |c>|n \"generá un ERC-20 y deployalo a Monad testnet\n"
+            "|c│|n         (chainId |y10143|n, RPC |whttps://testnet-rpc.monad.xyz|n).\"\n"
+            "|c│|n     Fundeá tu wallet antes: |whttps://faucet.monad.xyz|n\n"
+            "|c│|n\n"
+            "|c│|n  |w4)|n |cVolvé aquí y pegá el tx hash|n:\n"
+            "|c│|n       |c>|n verify claude 0x...\n"
+            "|c│|n     Si la tx es real y exitosa → quest desbloqueada +\n"
+            "|c│|n     contrato guardado en tu bitácora + bonus si la wallet\n"
+            "|c│|n     de deploy == tu wallet linkeada (|wlink 0x...|n).\n"
+            "|c│|n\n"
+            "|c│|n  Docs reales: |whttps://docs.claude.com/claude-code|n\n"
+            "|c╰──────────────────────────────────────────────────────╯|n"
         )
 
     # --- subcommand dispatch ----------------------------------------------
@@ -1616,148 +1621,98 @@ class CmdClaude(Command):
         caller.msg(f"claude: subcomando desconocido '{sub}'. Prueba: |wclaude help|n")
         _reward_if_quest(caller, "claude")
 
-    # --- subcommand: skills -----------------------------------------------
+    # ------------------------------------------------------------------
+    # Los subcomandos YA NO se simulan dentro del MUD.
+    # Cada uno imprime un nudge hacia la terminal real + completa la
+    # quest (trust-based: pagamos por tipear el comando correcto, no
+    # por hacer la acción — la acción se valida con `verify`).
+    # ------------------------------------------------------------------
+
     def _cmd_skills(self, caller, rest):
-        if not rest or rest[0] in ("list", "ls"):
-            caller.msg("|ySkills disponibles:|n")
-            for slug, meta in AVAILABLE_SKILLS.items():
-                caller.msg(f"  |w{slug}|n  — {meta['name']} ({meta['author']})\n      {meta['desc']}")
-            caller.msg("\nInstala con: |wclaude skills install <slug>|n")
-            return
-
-        action = rest[0].lower()
-        if action == "installed":
-            inst = list(caller.db.installed_skills or [])
-            if not inst:
-                caller.msg("(sin skills instalados — usa |wclaude skills install <slug>|n)")
-                return
-            caller.msg("|ySkills instalados:|n")
-            for slug in inst:
-                meta = AVAILABLE_SKILLS.get(slug, {"name": slug, "author": "?", "desc": ""})
-                caller.msg(f"  |g✓|n |w{slug}|n — {meta.get('name', slug)}")
-            return
-
-        if action == "install":
-            if len(rest) < 2:
-                caller.msg("usage: claude skills install <owner/slug>")
-                return
+        """`claude skills` — ya no se simula. Redirige a la terminal real."""
+        action = (rest[0].lower() if rest else "")
+        if action == "install" and len(rest) >= 2:
             slug = rest[1]
-            if slug not in AVAILABLE_SKILLS:
-                caller.msg(
-                    f"|rclaude:|n skill '{slug}' no encontrado.\n"
-                    f"Lista disponibles con: |wclaude skills list|n"
-                )
-                return
-            inst = list(caller.db.installed_skills or [])
-            if slug in inst:
-                caller.msg(f"(ya tenías '{slug}' instalado)")
-                return
-            inst.append(slug)
-            caller.db.installed_skills = inst
-            meta = AVAILABLE_SKILLS[slug]
             caller.msg(
-                f"\n|g→|n Descargando |w{slug}|n ...\n"
-                f"|g→|n {meta['desc']}\n"
-                f"|g✓|n Skill instalado. Ya puedes invocar sus capacidades (ej. "
-                f"|wclaude new contract <Nombre>|n)."
+                f"\n|y╭─ claude skills install — corré esto REAL ─────╮|n\n"
+                f"|y│|n  Este MUD |yno instala skills|n. En tu terminal:\n"
+                f"|y│|n    |c$|n claude\n"
+                f"|y│|n    |c>|n /skills install {slug}\n"
+                f"|y│|n  (o el slash-command que documente el skill)\n"
+                f"|y│|n\n"
+                f"|y│|n  Los skills de Claude Code son módulos reales que\n"
+                f"|y│|n  agregan capacidades al agente. Ver marketplace oficial:\n"
+                f"|y│|n    |whttps://docs.claude.com/claude-code/skills|n\n"
+                f"|y╰────────────────────────────────────────────────╯|n"
             )
             _reward_if_quest(caller, "claude:skill")
             return
 
-        caller.msg(f"claude skills: acción desconocida '{action}'")
+        if action in ("list", "ls", ""):
+            caller.msg(
+                "\n|y╭─ claude skills list — corré esto REAL ────────╮|n\n"
+                "|y│|n  Este MUD |yno hostea skills|n. En tu terminal:\n"
+                "|y│|n    |c$|n claude\n"
+                "|y│|n    |c>|n /skills list\n"
+                "|y│|n\n"
+                "|y│|n  Skills sugeridos para Monad:\n"
+                "|y│|n    · |wportdeveloper/monad-development|n\n"
+                "|y│|n    · |waustin-griffith/scaffold-eth|n\n"
+                "|y│|n    · |wanthropic/claude-code-guide|n\n"
+                "|y╰────────────────────────────────────────────────╯|n"
+            )
+            return
 
-    # --- subcommand: new --------------------------------------------------
+        caller.msg(
+            f"claude skills: acción '{action}' ya no se simula en el MUD.\n"
+            "Corré |wclaude|n (sin args) para el flujo completo."
+        )
+
     def _cmd_new(self, caller, rest):
+        """`claude new contract <Name>` — ya no genera archivo local."""
         if len(rest) < 2:
             caller.msg("usage: claude new <contract|token> <Nombre>")
             return
         kind = rest[0].lower()
         name = rest[1]
-
-        if not caller.db.installed_skills:
-            caller.msg(
-                "|yclaude:|n ningún skill instalado todavía.\n"
-                "Instala primero: |wclaude skills install austin-griffith/solidity-basics|n"
-            )
-            return
-
         if kind not in ("contract", "token"):
             caller.msg("usage: claude new <contract|token> <Nombre>")
             return
 
-        if not name.isidentifier():
-            caller.msg(f"|rclaude:|n '{name}' no es un identificador Solidity válido.")
-            return
-
-        symbol = (name[:4]).upper() if kind == "token" else name.upper()[:6]
-        contents = _CONTRACT_TEMPLATE.format(name=name, symbol=symbol)
-        filename = f"{name}.sol"
-        loc = caller.location
-        if not loc:
-            caller.msg("(sin ubicación)")
-            return
-        _write_player_file(caller, loc, filename, contents, append=False)
-        lines = contents.count("\n")
         caller.msg(
-            f"\n|g→|n Generando |w{filename}|n con Claude (skill: solidity-basics)...\n"
-            f"|g✓|n Escrito {lines} líneas en |w{filename}|n.\n"
-            f"Revisa con |wcat {filename}|n. Deploya con |wclaude deploy {filename}|n."
+            f"\n|y╭─ claude new {kind} — corré esto REAL ──────────╮|n\n"
+            f"|y│|n  Este MUD |yno genera archivos .sol|n. En tu terminal:\n"
+            f"|y│|n    |c$|n claude\n"
+            f"|y│|n    |c>|n \"generá un {kind} ERC-20 llamado {name}\n"
+            f"|y│|n       y guardalo en {name}.sol\"\n"
+            f"|y│|n\n"
+            f"|y│|n  Claude te devuelve código Solidity real, lo revisás\n"
+            f"|y│|n  con |wcat {name}.sol|n en tu shell, y después deployás.\n"
+            f"|y╰────────────────────────────────────────────────╯|n"
         )
         _reward_if_quest(caller, "claude:new")
 
-    # --- subcommand: deploy -----------------------------------------------
     def _cmd_deploy(self, caller, rest):
-        if not rest:
-            caller.msg("usage: claude deploy <archivo.sol>")
-            return
-        fname = rest[0]
-        loc = caller.location
-        merged = _get_room_files(loc, caller)
-        if fname not in merged:
-            caller.msg(f"|rclaude deploy:|n {fname}: No such file or directory")
-            return
-        src = merged[fname] or ""
-        if "contract " not in src:
-            caller.msg(f"|rclaude deploy:|n {fname} no parece Solidity (sin `contract`).")
-            return
-        installed = set(caller.db.installed_skills or [])
-        if not (installed & DEPLOY_ENABLING_SKILLS):
-            caller.msg(
-                "|yclaude:|n para deployar en Monad necesitas el skill oficial.\n"
-                "Instálalo: |wclaude skills install portdeveloper/monad-development|n\n"
-                "(incluye verificación auto en MonadVision / Socialscan / Monadscan, "
-                "Foundry + viem + wagmi, faucet via agents.devnads.com)"
-            )
-            return
-
-        # Construir una address + tx hash pseudo-determinísticos (no onchain real).
-        import hashlib
-        seed = f"{caller.key}:{fname}:{len(caller.db.deployed_contracts or [])}".encode()
-        h = hashlib.sha256(seed).hexdigest()
-        fake_addr = "0x" + h[:40]
-        fake_tx = "0x" + h[24:88]
-
-        deployed = list(caller.db.deployed_contracts or [])
-        deployed.append({"file": fname, "address": fake_addr, "tx": fake_tx})
-        caller.db.deployed_contracts = deployed
-
-        # Si instaló el skill oficial con auto-verify, mostramos una línea extra
-        verify_line = ""
-        if "portdeveloper/monad-development" in installed:
-            verify_line = (
-                f"|g│|n  verify:   |gauto-verificado|n en MonadVision + Socialscan + Monadscan\n"
-                f"|g│|n            POST agents.devnads.com/v1/verify (skill portdeveloper)\n"
-            )
-
+        """`claude deploy <file>` — empuja a deployar de verdad y a `verify`."""
+        fname = rest[0] if rest else "MiToken.sol"
         caller.msg(
-            f"\n|g╭─ claude deploy → Monad testnet ──────────────────╮|n\n"
-            f"|g│|n  source:   |w{fname}|n ({src.count(chr(10))} líneas)\n"
-            f"|g│|n  network:  |wMonad testnet (chainId 10143)|n\n"
-            f"|g│|n  address:  |y{fake_addr}|n\n"
-            f"|g│|n  tx:       |w{fake_tx}|n\n"
-            f"|g│|n  explorer: https://testnet.monadexplorer.com/address/{fake_addr}\n"
-            f"{verify_line}"
-            f"|g│|n  |x(deploy simulado — para deploy real usa Foundry + PRIVATE_KEY)|n\n"
-            f"|g╰──────────────────────────────────────────────────╯|n"
+            f"\n|y╭─ claude deploy — corré esto REAL ─────────────╮|n\n"
+            f"|y│|n  Este MUD |yno deploya contratos|n. En tu terminal:\n"
+            f"|y│|n    |c$|n claude\n"
+            f"|y│|n    |c>|n \"deployá {fname} a Monad testnet\n"
+            f"|y│|n       (chainId |y10143|n)\"\n"
+            f"|y│|n\n"
+            f"|y│|n  Claude te pedirá una wallet con fondos. Faucet:\n"
+            f"|y│|n    |whttps://faucet.monad.xyz|n\n"
+            f"|y│|n\n"
+            f"|y│|n  Cuando termine, te devuelve un |wtx hash|n. Copialo\n"
+            f"|y│|n  y volvé aquí:\n"
+            f"|y│|n    |c>|n verify claude <tx>\n"
+            f"|y│|n\n"
+            f"|y│|n  El MUD consulta |whttps://testnet-rpc.monad.xyz|n y,\n"
+            f"|y│|n  si chequea, desbloquea la quest |wq18_deploy|n.\n"
+            f"|y╰────────────────────────────────────────────────╯|n"
         )
-        _reward_if_quest(caller, "claude:deploy")
+        # NOTA: `claude:deploy` YA NO se completa aquí. Sólo se completa
+        # al hacer `verify claude <tx>` con una tx real y válida. Esto
+        # mantiene la promesa del producto: el alumno deployó de verdad.

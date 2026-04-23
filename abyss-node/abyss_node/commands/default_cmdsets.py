@@ -40,6 +40,9 @@ from commands.memories import CmdMemories
 from commands.progress import CmdProgress
 from commands.leaderboard import CmdLeaderboardCourse
 from commands.mint import CmdMint
+# Portal de salida: verifica deploys REALES (Claude Code / OpenClaw /
+# Hermes) contra Monad testnet en vez de simular adentro del MUD.
+from commands.verify import CmdVerify
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -98,6 +101,10 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdLink())
         self.add(CmdQuests())
         self.add(CmdClaim())
+        # Verify: portal de vuelta para deploys REALES a Monad testnet.
+        # El alumno deploya con Claude/OpenClaw/Hermes en su terminal
+        # real y pega el tx hash aquí — el MUD consulta el RPC y valida.
+        self.add(CmdVerify())
         self.add(CmdStats())
         # Onboarding / UX — reemplaza el help default con vista contextual
         self.add(CmdHelpCustom())

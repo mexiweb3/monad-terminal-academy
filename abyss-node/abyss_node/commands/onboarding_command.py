@@ -485,6 +485,9 @@ def _next_challenge(caller) -> tuple[str, str]:
             pretty = {
                 "claude:skill": "claude skills install portdeveloper/monad-development",
                 "claude:new": "claude new contract MiToken",
+                # `verify:claude` reemplaza a `claude:deploy` — ahora la
+                # quest sólo se completa con un deploy REAL verificado onchain.
+                "verify:claude": "verify claude <tx-hash>  (deployá con claude real primero)",
                 "claude:deploy": "claude deploy MiToken.sol",
                 "install:claude": "curl -fsSL https://claude.ai/install.sh | bash",
                 "install:openclaw": "curl -fsSL https://openclaw.ai/install.sh | bash",
