@@ -28,6 +28,7 @@ from commands.help_command import CmdHelpCustom
 from commands.onboarding_command import CmdTutorial, CmdBitacora
 from commands.stats_command import CmdStats
 from commands.language import CmdLanguage
+from commands.unloggedin import CmdCreateIntercept
 # Sesión D — gameplay: puzzles, combate, collectibles, easter eggs
 from commands.game_commands import (
     CmdSolve, CmdScan, CmdFight, CmdReconstruct,
@@ -171,9 +172,9 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         Populates the cmdset
         """
         super().at_cmdset_creation()
-        #
-        # any commands you add below will overload the default ones.
-        #
+        # Sobrescribe `create` con bienvenida narrativa + selector temprano
+        # de idioma (3er arg opcional: es|en). Conserva aliases "cre"/"cr".
+        self.add(CmdCreateIntercept())
 
 
 class SessionCmdSet(default_cmds.SessionCmdSet):

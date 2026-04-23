@@ -1,7 +1,7 @@
 """
 i18n — infraestructura de traducción ES/EN para Terminal Academy.
 
-Arquitectura de plumbing, no de contenido. La idea es que cualquier string
+Arquitectura de plumbing + contenido. La idea es que cualquier string
 player-facing del MUD pueda resolverse con `t(caller, "clave.punteada")` y
 que el jugador pueda cambiar idioma con el comando `language` (setea
 `account.db.language`).
@@ -64,6 +64,7 @@ def _log_warn(msg: str) -> None:
 #   tutorial.*      -> ACADEMY_TUTORIAL (typeclasses/characters.py)
 #   prologue.*      -> world/lore/fragments.py PROLOGUE
 #   outro.*         -> world/lore/fragments.py OUTRO
+#   create.*        -> UX narrativo del comando `create` pre-login
 #   cmd.<name>.*    -> strings del comando <name>
 #   room.<key>.*    -> descripciones de rooms
 #   npc.<key>.*     -> diálogos de NPCs
@@ -111,6 +112,44 @@ TRANSLATIONS = {
         "en": "You can also greet |cProf. Shell|n with |wsay hi prof|n if you feel lost.",
     },
 
+    # ------ Create intercept (bienvenida narrativa al crear cuenta) ------
+    # Banners cortos que emite CmdCreateIntercept antes/después de delegar
+    # a la creación real de cuenta de Evennia.
+    "create.detecting": {
+        "es": "|g> DETECTING SIGNAL...|n   |mneófito entrando al grid|n",
+        "en": "|g> DETECTING SIGNAL...|n   |mnewcomer entering the grid|n",
+    },
+    "create.identity_written": {
+        "es": "|g> IDENTITY WRITTEN TO /dev/academy/|n",
+        "en": "|g> IDENTITY WRITTEN TO /dev/academy/|n",
+    },
+    "create.language_prompt": {
+        "es": (
+            "|g> LANGUAGE?|n Escribe |wlanguage es|n o |wlanguage en|n después de loguearte.\n"
+            "|xDefault: español. En la pantalla de login puedes pasar idioma como 3er arg:|n\n"
+            "|x  create <nombre> <clave> en|n"
+        ),
+        "en": (
+            "|g> LANGUAGE?|n Type |wlanguage es|n or |wlanguage en|n after logging in.\n"
+            "|xDefault: Spanish. On the login screen you can pass lang as 3rd arg:|n\n"
+            "|x  create <name> <pass> en|n"
+        ),
+    },
+    "create.sealed": {
+        "es": (
+            "|g> LEDGER ENTRY SEALED.|n\n"
+            "|c> Prof. Shell te espera en /home.|n Conéctate con |wconnect <nombre> <clave>|n."
+        ),
+        "en": (
+            "|g> LEDGER ENTRY SEALED.|n\n"
+            "|c> Prof. Shell is waiting in /home.|n Log in with |wconnect <name> <pass>|n."
+        ),
+    },
+    "create.lang_set": {
+        "es": "|g> Idioma preferido registrado: |y{lang}|n.",
+        "en": "|g> Preferred language recorded: |y{lang}|n.",
+    },
+
     # ------ Prólogo (world/lore/fragments.py PROLOGUE) -------------------
     "prologue.scene.title": {
         "es": "CAPÍTULO I · DESPERTAR",
@@ -136,6 +175,16 @@ TRANSLATIONS = {
         "en": (
             "A broken filesystem stretches as far as your memory reaches. "
             "Directories flicker like constellations about to go out."
+        ),
+    },
+    "prologue.narrate_2": {
+        "es": (
+            "Si te pierdes, saluda al Profesor con `say hola prof`. "
+            "Él vive aquí, en /home, y te espera."
+        ),
+        "en": (
+            "If you get lost, greet the Professor with `say hi prof`. "
+            "He lives here, in /home, waiting for you."
         ),
     },
     "prologue.dialogue_1": {
@@ -170,6 +219,131 @@ TRANSLATIONS = {
         "en": (
             "If you get lost, greet the Professor with `say hi prof`. "
             "He lives here, in /home, and he's waiting for you."
+        ),
+    },
+
+    # ------ Outro (world/lore/fragments.py OUTRO) ------------------------
+    "outro.scene.title": {
+        "es": "CAPÍTULO III · ASCENSIÓN",
+        "en": "CHAPTER III · ASCENSION",
+    },
+    "outro.scene.body": {
+        "es": (
+            "Las paredes del /claude_dojo vibran. Los diez fragmentos de "
+            "tu memoria se alinean como estrellas. Sabes leer, crear, "
+            "conectar, persistir, invocar. Ya no eres un neófito: eres "
+            "un intérprete del shell."
+        ),
+        "en": (
+            "The walls of /claude_dojo vibrate. The ten fragments of "
+            "your memory align like stars. You know how to read, create, "
+            "connect, persist, invoke. You are no longer a neophyte: you "
+            "are an interpreter of the shell."
+        ),
+    },
+    "outro.narrate_1": {
+        "es": (
+            "El Corruptor retrocede. No lo has destruido — nadie lo destruye — "
+            "pero le has arrebatado lo que devoraba: tu silencio."
+        ),
+        "en": (
+            "The Corruptor retreats. You haven't destroyed it — no one ever does — "
+            "but you've taken back what it used to devour: your silence."
+        ),
+    },
+    "outro.narrate_2": {
+        "es": "Has completado Terminal Academy. Bienvenide al siguiente plano.",
+        "en": "You have completed Terminal Academy. Welcome to the next plane.",
+    },
+    "outro.dialogue_1": {
+        "es": "Lo lograste. Ya no te enseño yo — desde hoy te enseña la práctica.",
+        "en": "You did it. I'm no longer your teacher — from today on, practice is.",
+    },
+    "outro.dialogue_2": {
+        "es": (
+            "Sólo queda un ritual. Linkea tu wallet con `link 0x...` y luego "
+            "`claim`. Tu identidad quedará grabada onchain en Monad, "
+            "imposible de borrar, imposible de olvidar."
+        ),
+        "en": (
+            "Only one ritual remains. Link your wallet with `link 0x...` and then "
+            "`claim`. Your identity will be engraved onchain on Monad, "
+            "impossible to erase, impossible to forget."
+        ),
+    },
+    "outro.dialogue_3": {
+        "es": (
+            "Recuerda: el shell no se aprende una sola vez. "
+            "Vuelve cuando quieras — siempre habrá algo nuevo que teclear."
+        ),
+        "en": (
+            "Remember: the shell isn't something you learn only once. "
+            "Come back whenever you want — there will always be something new to type."
+        ),
+    },
+
+    # ------ Descripciones de rooms (world/zones/terminal_academy.py) -----
+    # Solo sembramos EN para los 6 rooms iniciales críticos. El swap real
+    # en las rooms (caller-aware) lo puede encarar F5 en otra sesión; aquí
+    # garantizamos el contenido traducido para cuando se migre.
+    "room.home.desc": {
+        "es": (
+            "Estás en |g/home|n, tu directorio base. Un cursor verde parpadea en la\n"
+            "oscuridad. Prof. Shell te espera aquí. Teclea |wls|n para ver qué hay."
+        ),
+        "en": (
+            "You are in |g/home|n, your base directory. A green cursor blinks in the\n"
+            "darkness. Prof. Shell is waiting here. Type |wls|n to see what's around."
+        ),
+    },
+    "room.ls_dojo.desc": {
+        "es": (
+            "Sala |gls_dojo|n — un espacio abierto lleno de archivos flotando como hojas.\n"
+            "Aquí aprendes a |wlistar|n lo invisible. |wls -la|n revela los ocultos."
+        ),
+        "en": (
+            "The |gls_dojo|n — an open space full of files drifting like leaves.\n"
+            "Here you learn to |wlist|n what's hidden. |wls -la|n reveals the unseen."
+        ),
+    },
+    "room.cd_dojo.desc": {
+        "es": (
+            "Sala |gcd_dojo|n — un cruce de caminos. Las salidas se ramifican como un\n"
+            "árbol. Practica |wcd <dir>|n y |wpwd|n para saber siempre dónde estás."
+        ),
+        "en": (
+            "The |gcd_dojo|n — a crossroads. Exits branch out like a tree.\n"
+            "Practice |wcd <dir>|n and |wpwd|n so you always know where you are."
+        ),
+    },
+    "room.cat_dojo.desc": {
+        "es": (
+            "Sala |gcat_dojo|n — un templo de lectura. Cada archivo es una puerta al\n"
+            "pasado. |wcat <archivo>|n despierta lo que el texto guarda dormido."
+        ),
+        "en": (
+            "The |gcat_dojo|n — a temple of reading. Every file is a door to the\n"
+            "past. |wcat <file>|n awakens what the text keeps dormant."
+        ),
+    },
+    "room.mkdir_dojo.desc": {
+        "es": (
+            "Sala |gmkdir_dojo|n — aquí se crea. |wmkdir <nombre>|n construye un\n"
+            "directorio; |wtouch <archivo>|n crea un archivo vacío. Construye algo."
+        ),
+        "en": (
+            "The |gmkdir_dojo|n — this is where things are made. |wmkdir <name>|n\n"
+            "builds a directory; |wtouch <file>|n creates an empty file. Build something."
+        ),
+    },
+    "room.claude_dojo.desc": {
+        "es": (
+            "Sala |gclaude_dojo|n — el altar de la IA. Aquí |wclaude|n abre un CLI\n"
+            "capaz de generar y deployar contratos en Monad. El último fragmento vive aquí."
+        ),
+        "en": (
+            "The |gclaude_dojo|n — the AI altar. Here |wclaude|n opens a CLI\n"
+            "that can generate and deploy contracts on Monad. The last fragment lives here."
         ),
     },
 

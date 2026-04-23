@@ -385,13 +385,60 @@ class Character(ObjectParent, DefaultCharacter):
                 pass
         return super().execute_cmd(raw_string, session=session, **kwargs)
 
+    def _get_prologue(self, caller):
+        """Construye la tupla del PROLOGUE con textos traducidos al idioma
+        de `caller`. Si i18n falla, cae al PROLOGUE hardcoded de fragments.
+
+        No mutamos `PROLOGUE` original — sigue siendo fuente de keys y
+        fallback en caso de falla del plumbing.
+        """
+        try:
+            from utils.i18n import t
+            return (
+                ("scene", t(caller, "prologue.scene.title"),
+                 t(caller, "prologue.scene.body")),
+                ("narrate", t(caller, "prologue.narrate_1")),
+                ("dialogue", "Prof. Shell", t(caller, "prologue.dialogue_1")),
+                ("dialogue", "Prof. Shell", t(caller, "prologue.dialogue_2")),
+                ("dialogue", "Prof. Shell", t(caller, "prologue.dialogue_3")),
+                ("narrate", t(caller, "prologue.narrate_2")),
+            )
+        except Exception:
+            try:
+                from world.lore.fragments import PROLOGUE
+                return PROLOGUE
+            except Exception:
+                return ()
+
+    def _get_outro(self, caller):
+        """Construye la tupla del OUTRO con textos traducidos al idioma
+        de `caller`. Fallback al OUTRO hardcoded si i18n falla.
+        """
+        try:
+            from utils.i18n import t
+            return (
+                ("scene", t(caller, "outro.scene.title"),
+                 t(caller, "outro.scene.body")),
+                ("narrate", t(caller, "outro.narrate_1")),
+                ("dialogue", "Prof. Shell", t(caller, "outro.dialogue_1")),
+                ("dialogue", "La Forjadora", t(caller, "outro.dialogue_2")),
+                ("dialogue", "Prof. Shell", t(caller, "outro.dialogue_3")),
+                ("narrate", t(caller, "outro.narrate_2")),
+            )
+        except Exception:
+            try:
+                from world.lore.fragments import OUTRO
+                return OUTRO
+            except Exception:
+                return ()
+
     def _play_prologue_once(self):
         """Acto I DESPERTAR, idempotente vía db.seen_prologue."""
         if self.db.seen_prologue:
             return
         try:
-            from world.lore.fragments import PROLOGUE
-            self._play_script(PROLOGUE)
+            script = self._get_prologue(self)
+            self._play_script(script)
         except Exception:
             # Nunca romper el login por un bug narrativo.
             return
@@ -417,8 +464,8 @@ class Character(ObjectParent, DefaultCharacter):
         if len(done) < len(QUESTS):
             return
         try:
-            from world.lore.fragments import OUTRO
-            self._play_script(OUTRO)
+            script = self._get_outro(self)
+            self._play_script(script)
         except Exception:
             return
         self.db.seen_outro = True
