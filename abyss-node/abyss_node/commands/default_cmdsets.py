@@ -27,6 +27,7 @@ from commands.terminal_commands import (
 from commands.help_command import CmdHelpCustom
 from commands.onboarding_command import CmdTutorial, CmdBitacora
 from commands.stats_command import CmdStats
+from commands.language import CmdLanguage
 # Sesión D — gameplay: puzzles, combate, collectibles, easter eggs
 from commands.game_commands import (
     CmdSolve, CmdScan, CmdFight, CmdReconstruct,
@@ -94,6 +95,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdStats())
         # Onboarding / UX — reemplaza el help default con vista contextual
         self.add(CmdHelpCustom())
+        # i18n — selector de idioma ES/EN (persiste en account.db.language)
+        self.add(CmdLanguage())
         # Sesión C — Onboarding: tutorial guiado + dashboard de bitácora
         self.add(CmdTutorial())
         self.add(CmdBitacora())

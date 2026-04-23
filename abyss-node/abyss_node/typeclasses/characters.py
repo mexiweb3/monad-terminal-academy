@@ -20,14 +20,33 @@ IDLE_THRESHOLD = 45         # silencio mínimo antes de disparar un hint
 IDLE_HINT_COOLDOWN = 45     # espaciado mínimo entre hints consecutivos
 
 
-ACADEMY_BANNER = (
-    "\n"
-    "|g ╔══════════════════════════════════════════════════════════╗|n\n"
-    "|g ║|n    |yM O N A D   T E R M I N A L   A C A D E M Y|n             |g║|n\n"
-    "|g ║|n    aprende la terminal · gana |y$TERM|n onchain en Monad       |g║|n\n"
-    "|g ║|n    + |cClaude CLI|n para generar y deployar contratos          |g║|n\n"
-    "|g ╚══════════════════════════════════════════════════════════╝|n\n"
-)
+# Ejemplo de swap a i18n — demuestra el patrón. El resto del banner sigue
+# hardcoded en ES hasta que otra sesión complete la migración; esta función
+# sólo saca el título de TRANSLATIONS["banner.title"] según caller.
+def render_academy_banner(caller=None):
+    """Banner de bienvenida de la Academia.
+
+    Si `caller` es None o no se puede resolver idioma, usa DEFAULT_LANG.
+    Solo la LÍNEA DEL TÍTULO se traduce por ahora (prueba del plumbing).
+    """
+    try:
+        from utils.i18n import t
+        title = t(caller, "banner.title") if caller is not None else "M O N A D   T E R M I N A L   A C A D E M Y"
+    except Exception:
+        title = "M O N A D   T E R M I N A L   A C A D E M Y"
+    return (
+        "\n"
+        "|g ╔══════════════════════════════════════════════════════════╗|n\n"
+        f"|g ║|n    |y{title}|n             |g║|n\n"
+        "|g ║|n    aprende la terminal · gana |y$TERM|n onchain en Monad       |g║|n\n"
+        "|g ║|n    + |cClaude CLI|n para generar y deployar contratos          |g║|n\n"
+        "|g ╚══════════════════════════════════════════════════════════╝|n\n"
+    )
+
+
+# Compat: algunos módulos pueden importar ACADEMY_BANNER como string. Mantener
+# el símbolo con el render default (sin caller → ES) para no romper imports.
+ACADEMY_BANNER = render_academy_banner()
 
 ACADEMY_TUTORIAL = (
     "|wBienvenide a la Academia.|n Curso interactivo de terminal que paga\n"
@@ -139,7 +158,9 @@ class Character(ObjectParent, DefaultCharacter):
             return
         if not self.db.first_login_done:
             self.db.first_login_done = True
-            self.msg(ACADEMY_BANNER)
+            # Usa el renderer con caller para que el título respete el idioma
+            # del account (account.db.language). Ejemplo del swap i18n.
+            self.msg(render_academy_banner(self))
             self.msg(ACADEMY_TUTORIAL)
         # Prólogo narrativo v2 — Acto I DESPERTAR. Independiente del banner:
         # un player puede tener first_login_done=True por un flujo anterior
