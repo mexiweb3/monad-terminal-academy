@@ -580,6 +580,21 @@ class Character(ObjectParent, DefaultCharacter):
                 super().msg(message)
         if new_shown:
             self.db.achievements_shown = shown
+        # F4 · mint prompt — al completar TODAS las quests, invitar una sola
+        # vez a mintear el NFT-certificado. Guard `db.mint_prompt_shown`.
+        try:
+            from commands.terminal_commands import QUESTS as _QUESTS
+            if (
+                len(set(quest_done)) >= len(_QUESTS)
+                and not self.db.mint_prompt_shown
+            ):
+                self.db.mint_prompt_shown = True
+                super().msg(
+                    "\n|y★ Ya eres intérprete del shell.|n "
+                    "Teclea |wmint|n para grabar tu certificado onchain.\n"
+                )
+        except Exception:
+            pass
 
     def get_display_name(self, looker, **kwargs):
         """Show HP in name for combat."""

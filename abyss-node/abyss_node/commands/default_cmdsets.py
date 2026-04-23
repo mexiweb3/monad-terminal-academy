@@ -31,9 +31,15 @@ from commands.language import CmdLanguage
 # Sesión D — gameplay: puzzles, combate, collectibles, easter eggs
 from commands.game_commands import (
     CmdSolve, CmdScan, CmdFight, CmdReconstruct,
-    CmdInventoryMem, CmdLeaderboard,
+    CmdInventoryMem, CmdLeaderboard as CmdSpeedrun,
     CmdSudo, CmdRm, CmdCancel,
 )
+# Sesión F (course features) — memorias, dashboard de progreso, leaderboard
+# por $TERM ganados, y mint del Graduate NFT.
+from commands.memories import CmdMemories
+from commands.progress import CmdProgress
+from commands.leaderboard import CmdLeaderboardCourse
+from commands.mint import CmdMint
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -106,10 +112,23 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdFight())
         self.add(CmdReconstruct())
         self.add(CmdInventoryMem())
-        self.add(CmdLeaderboard())
+        # Sesión F: CmdLeaderboardCourse reemplaza a CmdSpeedrun como el
+        # `leaderboard` principal (ranking por $TERM ganados, con cache 60s).
+        # CmdSpeedrun sigue disponible por nombre alterno `lb` para quienes
+        # quieran ver el speedrun top.
+        self.add(CmdLeaderboardCourse())
+        # Mantenemos el speedrun con su alias `lb` sólo — liberamos `leaderboard`.
+        _sr = CmdSpeedrun()
+        _sr.key = "lb"
+        _sr.aliases = ["speedrun"]
+        self.add(_sr)
         self.add(CmdSudo())
         self.add(CmdRm())
         self.add(CmdCancel())
+        # Sesión F (course features)
+        self.add(CmdMemories())
+        self.add(CmdProgress())
+        self.add(CmdMint())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
