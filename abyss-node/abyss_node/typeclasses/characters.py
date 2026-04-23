@@ -30,15 +30,9 @@ ACADEMY_BANNER = (
 )
 
 ACADEMY_TUTORIAL = (
-    "|wBienvenide a la Academia.|n Este es un curso interactivo de terminal\n"
-    "que paga en |y$TERM|n (ERC-20 en Monad testnet) cuando terminas quests.\n"
-    "\n"
-    "|yPrimer paso:|n escribe |gls|n y presiona Enter para listar este directorio.\n"
-    "En cualquier momento escribe |ghelp|n para ver comandos + tu próxima quest.\n"
-    "También puedes saludar a |cProf. Shell|n con |wsay hola prof|n si estás perdide.\n"
-    "\n"
-    "Ahora también aprendes |cClaude CLI|n + a generar contratos en Monad.\n"
-    "Escribe |wclaude|n cuando llegues a |cclaude_dojo|n.\n"
+    "|wBienvenide a la Academia.|n Curso interactivo de terminal que paga\n"
+    "|y$TERM|n (ERC-20 en Monad testnet) por cada quest completada.\n"
+    "Escribe |ghelp|n para ver tu próxima quest o |wsay hola prof|n si te perdés.\n"
 )
 
 # (quests_completadas_threshold, key_en_achievements_shown, mensaje)
@@ -493,11 +487,14 @@ class Character(ObjectParent, DefaultCharacter):
         y emite un `achievement()` narrativo. Idempotente: sólo la primera
         vez que se lee cada fragmento.
 
-        Heurística: el header de cat es `────── fragmento_XX.mem ──────`.
+        El header de cat (ver commands/terminal_commands.py:291) es
+        `|x────── {filename} ──────|n`. El regex exige los dashes Unicode
+        alrededor para evitar falsos positivos cuando otro texto menciona
+        el archivo (README, hints, descripciones de room).
         """
         if not text or not isinstance(text, str):
             return
-        if "fragmento_" not in text or ".mem" not in text:
+        if "fragmento_" not in text or "──" not in text:
             return
         try:
             from world.lore.fragments import FRAGMENTS_BY_FILE, collect_fragment
@@ -505,8 +502,8 @@ class Character(ObjectParent, DefaultCharacter):
         except Exception:
             return
         import re
-        # Busca los nombres "fragmento_XX.mem" en el header/output.
-        candidates = re.findall(r"fragmento_\d{2}\.mem", text)
+        # Header real de cat: "|x────── fragmento_XX.mem ──────|n"
+        candidates = re.findall(r"──────\s+(fragmento_\d{2}\.mem)\s+──────", text)
         for fname in candidates:
             if fname not in FRAGMENTS_BY_FILE:
                 continue
